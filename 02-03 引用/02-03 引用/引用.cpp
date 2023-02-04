@@ -112,16 +112,91 @@ using namespace std;
 //	return 0;
 //}
 
-int& Add(int a, int b)
-{
-	int c = a + b;
-	return c;
-}
+//int& Add(int a, int b)
+//{
+//	int c = a + b;
+//	return c;
+//}
+//int main()
+//{
+//	int& ret = Add(1, 2);
+//	Add(3, 4);
+//	cout << "Add(1, 2) is :" << ret << endl;
+//	cout << "Add(1, 2) is :" << ret << endl;
+//	return 0;
+//}
+
+//#include <time.h>
+//struct A { int a[10000]; };
+//void TestFunc1(A a) {}
+//void TestFunc2(A& a) {}
+//void TestRefAndValue()
+//{
+//	A a;
+//	// 以值作为函数参数
+//	size_t begin1 = clock();
+//	for (size_t i = 0; i < 10000; ++i)
+//		TestFunc1(a);
+//	size_t end1 = clock();
+//	// 以引用作为函数参数
+//	size_t begin2 = clock();
+//	for (size_t i = 0; i < 10000; ++i)
+//		TestFunc2(a);
+//	size_t end2 = clock();
+//	// 分别计算两个函数运行结束后的时间
+//	cout << "TestFunc1(A)-time:" << end1 - begin1 << endl;
+//	cout << "TestFunc2(A&)-time:" << end2 - begin2 << endl;
+//}
+//int main()
+//{
+//	TestRefAndValue();
+//	return 0;
+//}
+
+//int Count();
+//int main()
+//{
+//	int a = 1;
+//    int& b = a;
+//	// 指针和引用，赋值/初始化，权限可以缩小，但是不能放大
+//	
+//	// 权限放大
+//	const int c = 2;
+//	int& d = c;
+//
+//	const int* p1 = NULL;
+//	int* p2 = p1;
+//
+//	// 权限保持
+//	const int c = 2;
+//	const int& d = c;
+//
+//	const int* p1 = NULL;
+//	const int* p2 = p1;
+//
+//	// 权限缩小
+//	int c = 2;
+//	const int& d = c;
+//
+//	int* p1 = NULL;
+//	const int* p2 = p1;
+//
+//	int& ret = Count(); // 临时变量返回值具有常性
+//	const int& ret = Count();
+//
+//	int i = 0; 
+//
+//	double& j = i;// 类型转换会产生临时变量
+//	const double& j = i;
+//
+//}
+
 int main()
 {
-	int& ret = Add(1, 2);
-	Add(3, 4);
-	cout << "Add(1, 2) is :" << ret << endl;
-	cout << "Add(1, 2) is :" << ret << endl;
+	int a = 10;
+	int& ra = a;
+	ra = 20;
+	int* pa = &a;
+	*pa = 20;
 	return 0;
 }
