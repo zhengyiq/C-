@@ -350,42 +350,42 @@ using namespace std;
 //}
 
 
-class A
-{
-public:
-	A(int a = 0)
-		:_a(a)
-	{
-		cout << "A(int a)" << endl;
-	}
-	A(const A& aa)
-		:_a(aa._a)
-	{
-		cout << "A(const A& aa)" << endl;
-	}
-	~A()
-	{
-		cout << "~A()" << endl;
-	}
-private:
-	int _a;
-};
-
-void func1(A aa)
-{}
-
-void func2(const A& aa)
-{}
-
+//class A
+//{
+//public:
+//	A(int a = 0)
+//		:_a(a)
+//	{
+//		cout << "A(int a)" << endl;
+//	}
+//	A(const A& aa)
+//		:_a(aa._a)
+//	{
+//		cout << "A(const A& aa)" << endl;
+//	}
+//	~A()
+//	{
+//		cout << "~A()" << endl;
+//	}
+//private:
+//	int _a;
+//};
+//
+//void func1(A aa)
+//{}
+//
+//void func2(const A& aa)
+//{}
+//
 //int main()
 //{
-//	A aa1 = 1; // 构造+拷贝构造->优化为直接构造
+//	A aa1 = 1; // 构造+拷贝构造 -> 优化为直接构造
 //
 //	func1(aa1); // 无优化
 //	cout << "--------------------" << endl;
-//	func1(1); // 构造+拷贝构造->优化为直接构造
+//	func1(1); // 构造+拷贝构造 -> 优化为直接构造
 //	cout << "--------------------" << endl;
-//	func1(A(2)); // 构造+拷贝构造->优化为直接构造
+//	func1(A(2)); // 构造+拷贝构造 -> 优化为直接构造
 //	cout << "--------------------" << endl;
 //	func2(aa1); // 无优化
 //	cout << "--------------------" << endl;
@@ -395,16 +395,25 @@ void func2(const A& aa)
 //	cout << "--------------------" << endl;
 //	return 0;
 //}
-
-A func3()
-{
-	A aa;
-	return aa; // 函数体中有一个构造和一个拷贝构造 
-}
-
-int main()
-{
-	func3(); // func3函数语句分在两行可能不会进行优化
-	cout << "--------------------" << endl;
-	A aa1 = func3(); // 构造+拷贝构造+拷贝构造->构造+拷贝构造
-}
+//
+//A func3()
+//{
+//	A aa;
+//	return aa; // 函数体中有一个构造和一个拷贝构造 
+//}
+//
+//A func4()
+//{
+//	return A(); // 函数体中有一个构造和一个拷贝构造 
+//}
+//
+//int main()
+//{
+//	func3(); // func3函数语句分在两行可能不会进行优化
+//	cout << "--------------------" << endl;
+//	A aa1 = func3(); // 拷贝构造+拷贝构造 -> 优化为拷贝构造
+//	cout << "--------------------" << endl;
+//	func4(); // 构造+拷贝构造 -> 优化为构造
+//	cout << "--------------------" << endl;
+//	A aa1 = func4(); // 构造+拷贝构造+拷贝构造 -> 优化为构造
+//}
