@@ -368,14 +368,14 @@ void TestDate5()
 	cout << i;
 	cout << j;
 
-	Date d1(2023, 2, 8);
+	//Date d1(2023, 2, 8);
 	//cout << d1;
-	Date d2(2024, 2, 8);
+	//Date d2(2024, 2, 8);
 	//d1.operator<<(cout);
 	//d1 << cout;
 
-	operator<<(cout, d1);
-	cout << d1 << d2;
+	//operator<<(cout, d1);
+	//cout << d1 << d2;
 }
 
 void TestDate6()
@@ -386,6 +386,21 @@ void TestDate6()
 	cout << d1;
 }
 
+class A 
+{
+public:
+	// const 修饰 *this
+	// this 的类型变成 const A*
+	// 内部不改变成员变量的成员函数
+	// 最好加上const，const对象和普通对象都可以使用
+	void Print() const
+	{
+		cout << _a << endl;
+	}
+private:
+	int _a;
+};
+
 int main()
 {
 	//TestDate1();
@@ -393,7 +408,13 @@ int main()
 	//TestDate3();
 	//TestDate4();
 	//TestDate5();
-	TestDate6();
+	//TestDate6();
+
+	const A aa;
+	aa.Print(); // err 权限的放大
+
+	cout << &aa << endl;
 
 	return 0;
 }
+

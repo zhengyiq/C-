@@ -1,6 +1,6 @@
 #include "Date.h"
 
-int Date::GetMonthDay(int year, int month)
+int Date::GetMonthDay(int year, int month) const
 {
 	assert(month > 0 && month < 13);
 
@@ -31,19 +31,19 @@ Date::Date(int year, int month, int day)
 
 }
 
-void Date::Print()
+void Date::Print() const
 {
 	cout << _year << "/" << _month << "/" << _day << endl;
 }
 
-bool Date::operator==(const Date& d)
+bool Date::operator==(const Date& d) const
 {
 	return _year == d._year
 		&& _month == d._month
 		&& _day == d._day;
 }
 
-bool Date::operator<(const Date& d)
+bool Date::operator<(const Date& d) const
 {
 	if (_year < d._year)
 		return true;
@@ -55,22 +55,22 @@ bool Date::operator<(const Date& d)
 		return false;
 }
 
-bool Date::operator<=(const Date& d)
+bool Date::operator<=(const Date& d) const
 {
 	return *this == d || *this < d;
 }
 
-bool Date::operator>(const Date& d)
+bool Date::operator>(const Date& d) const
 {
 	return !(*this <= d);
 }
 
-bool Date::operator>=(const Date& d)
+bool Date::operator>=(const Date& d) const
 {
 	return !(*this < d);
 }
 
-bool Date::operator!=(const Date& d)
+bool Date::operator!=(const Date& d) const
 {
 	return !(*this == d);
 }
@@ -87,7 +87,7 @@ Date& Date::operator=(const Date& d)
 	return *this;
 }
 
-Date Date::operator+(int day)
+Date Date::operator+(int day) const
 {
 	Date tmp = *this;
 
@@ -134,7 +134,6 @@ Date& Date::operator+=(int day)
 	}
 	return *this;
 }
-
 //// 使用+=来实现+
 //Date Date::operator+(int day)
 //{
@@ -164,8 +163,8 @@ Date& Date::operator-=(int day)
 
 	return *this;
 }
-
-Date Date::operator-(int day)
+// 日期-天数
+Date Date::operator-(int day) const
 {
 	Date tmp(*this);
 	tmp -= day;
@@ -173,7 +172,8 @@ Date Date::operator-(int day)
 	return tmp;
 }
 
-int Date::operator-(const Date& d) 
+// 日期-日期
+int Date::operator-(const Date& d) const
 {
 	Date max = *this;
 	Date min = d;
@@ -196,6 +196,7 @@ int Date::operator-(const Date& d)
 
 
 // --d;
+// 前置--
 Date& Date::operator--()
 {
 	*this -= 1;
@@ -204,6 +205,7 @@ Date& Date::operator--()
 }
 
 // d--;
+// 后置--
 Date Date::operator--(int)
 {
 	Date tmp(*this);
@@ -213,6 +215,8 @@ Date Date::operator--(int)
 }
 
 // ++d;
+// 前置++：返回+1之后的结果
+// 注意：this指向的对象函数结束后不会销毁，故以引用方式返回提高效率
 Date& Date::operator++()
 {
 	*this += 1;
@@ -221,6 +225,11 @@ Date& Date::operator++()
 }
 
 // d++;
+// 后置++：
+// 前置++和后置++都是一元运算符，为了让前置++与后置++形成能正确重载
+// C++规定：后置++重载时多增加一个int类型的参数，但调用函数时该参数不用传递，编译器自动传递
+// 注意：后置++是先使用后+1，因此需要返回+1之前的旧值，故需在实现时需要先将this保存一份，然后给this + 1
+// 而temp是临时对象，因此只能以值的方式返回，不能返回引用
 Date Date::operator++(int)
 {
 	Date tmp(*this);
@@ -229,7 +238,8 @@ Date Date::operator++(int)
 	return tmp;
 }
 
-//void Date::operator<<(ostream& out)
+
+//ostream& Date::operator<<(ostream& out)
 //{
 //	out << _year << "年" << _month << "月" << _day << "日" << endl;
 // 
@@ -237,6 +247,7 @@ Date Date::operator++(int)
 //}
 
 // 全局函数
+// 内联函数不会进符号表
 ostream& operator<<(ostream& out, const Date& d)// 连续输出需要有返回值
 {
 	out << d._year << "年" << d._month << "月" << d._day << "日" << endl;

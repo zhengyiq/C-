@@ -13,20 +13,20 @@ class Date
 
 public:
 	Date(int year = 2023, int month = 1, int day = 1);
-	int GetMonthDay(int year, int month);
-	void Print();
-	bool operator==(const Date& d);
-	bool operator<(const Date& d);
-	bool operator<=(const Date& d);
-	bool operator>(const Date& d);
-	bool operator>=(const Date& d);
-	bool operator!=(const Date& d);
+	int GetMonthDay(int year, int month) const;
+	void Print() const;
+	bool operator==(const Date& d) const;
+	bool operator<(const Date& d) const;
+	bool operator<=(const Date& d) const;
+	bool operator>(const Date& d) const;
+	bool operator>=(const Date& d) const;
+	bool operator!=(const Date& d) const;
 	Date& operator=(const Date& d);
-	Date operator+(int day);
+	Date operator+(int day) const;
 	Date& operator+=(int day);	
-	Date operator-(int day);
+	Date operator-(int day) const;
 	Date& operator-=(int day);
-	int operator-(const Date& d);
+	int operator-(const Date& d) const;
 
 	Date& operator++(); // ++d;
 	// int参数 仅仅是为了占位，跟前置重载区分
@@ -35,8 +35,18 @@ public:
 	Date& operator--(); // --d;
 	Date operator--(int); // d--;
 
-	//// 成员函数
+	// 成员函数
 	//ostream& operator<<(ostream& out);
+
+	Date* operator&()
+	{
+		return this;
+	}
+
+	const Date* operator&()const
+	{
+		return this;
+	}
 
  private:
 	int _year;
