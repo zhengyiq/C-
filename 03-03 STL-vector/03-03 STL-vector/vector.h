@@ -12,6 +12,88 @@ namespace zyq
 		typedef T* iterator;
 		typedef const T* const_iterator;
 
+		vector()
+			//:_start(nullptr)
+			//, _finish(nullptr)
+			//, _end_of_storage(nullptr)
+		{}
+
+		// vector<int> v1(10, 5);
+		vector(size_t n, const T& val = T())
+			//:_start(nullptr)
+			//, _finish(nullptr)
+			//, _end_of_storage(nullptr)
+		{
+			//reserve(n);
+			_start = new T[n];
+			_end_of_storage = _start + n;
+			for (size_t i = 0; i < n; ++i)
+			{
+				_start[i] = val;
+			}
+			_finish = _start + n;
+		}
+
+		vector(int n, const T& val = T()) // 如果没有实例化该模板函数，在使用vector<int> v1(10, 5);的时候会发生报错。会使用迭代器区间版本的构造函数
+			//:_start(nullptr)
+			//, _finish(nullptr)
+			//, _end_of_storage(nullptr)
+		{
+			reserve(n);
+			for (size_t i = 0; i < n; ++i)
+			{
+				push_back(val);
+			}
+		}
+
+		// [first, last)
+		template <class InputIterator>
+		vector(InputIterator first, InputIterator last)
+			//:_start(nullptr)
+			//, _finish(nullptr)
+			//, _end_of_storage(nullptr)
+		{
+			while (first != last) // 迭代器要使用!=
+			{
+				push_back(*first);
+				++first;
+			}
+		}
+
+		//vector(const vector<T>& v)
+		//	//:_start(nullptr)
+		//	//, _finish(nullptr)
+		//	//, _end_of_storage(nullptr)
+		//{
+		//	//_start = new T[v.capacity()];
+		//	//_end_of_storage = _start + v.capacity();
+		//	reserve(v.capacity());
+		//	for (auto e : v)
+		//	{
+		//		push_back(e);
+		//	}
+		//}
+
+		vector(const vector<T>& v)
+			//:_start(nullptr)
+			//, _finish(nullptr)
+			//, _end_of_storage(nullptr)
+		{
+			_start = new T[v.capacity()];
+			for (size_t i = 0; i < v.size(); ++i)
+			{
+				_start[i] = v._start[i]; // 这里的=需要运算符重载
+			}
+			_finish = _start + v.size();
+			_end_of_storage = _start + v.capacity();
+		}
+
+		~vector()
+		{
+			delete[] _start;
+			_start = _finish = _end_of_storage = nullptr;
+		}
+
 		iterator begin()
 		{
 			return _start;
@@ -32,14 +114,8 @@ namespace zyq
 			return _finish;
 		}
 
-		vector()
-			:_start(nullptr)
-			,_finish(nullptr)
-			,_end_of_storage(nullptr)
-		{}
-
 		// insert后默认pos失效，不能再使用
-		void insert(iterator pos, const T& val) // 这里不能使用引用传参， v1.begin()返回的是临时对象，临时对象具有常性。
+		iterator insert(iterator pos, const T& val) // 这里不能使用引用传参， v1.begin()返回的是临时对象，临时对象具有常性。
 		{
 			assert(pos >= _start);
 			assert(pos <= _finish);
@@ -58,9 +134,10 @@ namespace zyq
 
 			*pos = val;
 			++_finish;
+			return pos;
 		}
 
-		void earse(iterator pos)
+		iterator erase(iterator pos)
 		{
 			assert(pos >= _start);
 			assert(pos < _finish);
@@ -73,6 +150,7 @@ namespace zyq
 			}
 
 			--_finish;
+			return pos;
 		}
 
 		void resize(size_t n, const T& val = T())
@@ -104,7 +182,11 @@ namespace zyq
 				T* tmp = new T[n];
 				if (_start)
 				{
-					memcpy(tmp, _start, sizeof(T) * size());
+					//memcpy(tmp, _start, sizeof(T) * size());
+					for (size_t i = 0; i < sz; ++i)
+					{
+						tmp[i] = _start[i];
+					}
 				}
 				delete[] _start;
 				_start = tmp;
@@ -154,10 +236,20 @@ namespace zyq
 			return _start[pos];
 		}
 
+		vector<T>& operator=(const vector<T>& v)
+		{
+			reserve(v.capacity());
+			for (auto e : v)
+			{
+				push_back(e);
+			}
+			return *this;
+		}
+
 	private:
-		iterator _start;
-		iterator _finish;
-		iterator _end_of_storage;
+		iterator _start = nullptr;
+		iterator _finish = nullptr;
+		iterator _end_of_storage = nullptr;
 	};
 
 	void func(const vector<int>& v)
@@ -202,7 +294,7 @@ namespace zyq
 		T x = T();
 		cout << x << endl;
 	}
-	void Testvecror2()
+	void Testvector2()
 	{
 		// 内置类型有没有构造函数
 		int x = int();
@@ -298,7 +390,7 @@ namespace zyq
 		auto pos = find(v1.begin(), v1.end(), 3);
 		if (pos != v1.end())
 		{
-			v1.earse(pos);
+			v1.erase(pos);
 		}
 		for (auto num : v1)
 		{
@@ -306,4 +398,181 @@ namespace zyq
 		}
 		cout << endl;
 	}
+
+	void Testvector6()
+	{
+		vector<int> v1;
+		v1.push_back(1);
+		v1.push_back(2);
+		v1.push_back(2);
+		v1.push_back(3);
+		v1.push_back(4);
+		v1.push_back(5);
+		v1.push_back(88);
+		for (auto e : v1)
+		{
+			cout << e << " ";
+		}
+		cout << endl;
+
+		// 要求删除所有整数
+
+		vector<int>::iterator it = v1.begin();
+		while (it != v1.end())
+		{
+			if (*it % 2 == 0)
+			{
+				it = v1.erase(it); // vs会进行强制检查，erase以后迭代器不能访问；g++没有强制检查，具体问题具体分析，结果未定义
+			}
+			else 
+			{
+				++it;
+			}
+		}
+		for (auto e : v1)
+		{
+			cout << e << " ";
+		}
+		cout << endl;
+	}
+
+	void Testvector7()
+	{
+		//vector<int> v1(10u, 5);
+		vector<int> v1(10, 5);
+		for (auto e : v1)
+		{
+			cout << e << " ";
+		}
+		cout << endl;
+
+		//vector<int> v2(++v1.begin(), --v1.end()) // 传值返回，返回临时变量具有常性不能修改
+		vector<int> v2(v1.begin() + 1, v1.end() - 1);
+		for (auto e : v2)
+		{
+			cout << e << " ";
+		}
+		cout << endl;
+
+		std::string s1("hello");
+		vector<char> v3(s1.begin(), s1.end());
+		for (auto e : v3)
+		{
+			cout << e << " ";
+		}
+		cout << endl;
+
+		int a[] = { 10, 20, 30 };
+		vector<int> v4(a, a + 3);
+		for (auto e : v4)
+		{
+			cout << e << " ";
+		}
+		cout << endl;
+
+		v1.insert(v1.begin(), 10);
+		for (auto e : v1)
+		{
+			cout << e << " ";
+		}
+		cout << endl;
+
+		sort(v1.begin(), v1.end());
+		for (auto e : v1)
+		{
+			cout << e << " ";
+		}
+		cout << endl;
+
+		sort(a, a + 3, greater<int>());
+		for (auto e : a)
+		{
+			cout << e << " ";
+		}
+		cout << endl;
+	}
+
+		void Testvector8()
+		{
+			vector<int> v1(10, 5);
+			for (auto e : v1)
+			{
+				cout << e << " ";
+			}
+			cout << endl;
+
+			vector<int> v2(v1);
+			for (auto e : v2)
+			{
+				cout << e << " ";
+			}
+			cout << endl;
+
+			vector<string> v3(3, "1111111111");
+			for (auto e : v3)
+			{
+				cout << e << " ";
+			}
+			cout << endl;
+
+			vector<string> v4(v3);
+			for (auto e : v4)
+			{
+				cout << e << " ";
+			}
+			cout << endl;
+		}
+
+		class Solution {
+		public:
+			vector<vector<int>> generate(int numRows) {
+				vector<vector<int>> vv;
+				vv.resize(numRows, vector<int>()); // 初始化外面的大vector
+				for (size_t i = 0; i < vv.size(); ++i)
+				{
+					vv[i].resize(i + 1, 0); // 初始化内部的vector
+					// vv[i].front() = 1;
+					// vv[i].back() = 1;
+					vv[i][0] = vv[i][vv[i].size() - 1] = 1;
+				}
+
+				for (int i = 2; i < vv.size(); ++i)
+				{
+					for (int j = 1; j < vv[i].size() - 1; ++j)
+					{
+						vv[i][j] = vv[i - 1][j] + vv[i - 1][j - 1];
+					}
+				}
+				return vv;
+			}
+		};
+
+		void Testvector9()
+		{
+			vector<int> v1(10, 5);
+			for (auto e : v1)
+			{
+				cout << e << " ";
+			}
+			cout << endl;
+
+			vector<int> v2;
+			v2 = v1;
+			for (auto e : v2)
+			{
+				cout << e << " ";
+			}
+			cout << endl;
+
+			vector<vector<int>> ret = Solution().generate(5);
+			for (int i = 0; i < ret.size(); ++i)
+			{
+				for (int j = 0; j < ret[i].size(); ++j)
+				{
+					cout << ret[i][j] << " ";
+				}
+				cout << endl;
+			}
+			cout << endl;
+		}
 }
