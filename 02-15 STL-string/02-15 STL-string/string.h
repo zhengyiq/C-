@@ -33,7 +33,19 @@ namespace zyq
 		}
 
 		//string() 
-		//	:_str(new char[1])
+		//	:_str(nullptr)
+		//	, _size(0)
+		//	, _capacity(0)
+		//{}
+
+		//string (const char* str)
+		//	:_str(str) 
+		//	,_size(strlen(str))
+		//	, _capacity(strlen(str))
+		//{}
+
+		//string() 
+		//	:_str(new char[1]) // 不能不添加[]，在析构时可以统一管理
 		//	, _size(0)
 		//	, _capacity(0)
 		//{
@@ -159,7 +171,10 @@ namespace zyq
 		{
 			if (n > _size)
 			{
-				reserve(n);
+				if (n > _capacity)
+				{
+					reserve(n);
+				}
 				for (size_t i = _size; i < n; ++i)
 				{
 					_str[i] = ch;
@@ -596,6 +611,19 @@ namespace zyq
 		string s1("asdadadadsa");
 		cin >> s1;
 		cout << s1 << endl;
+	}
+
+	void test_string12()
+	{
+		string s1("0123456789");
+		s1.reserve(15);
+		cout << s1.c_str() << endl;
+
+		s1.reserve(5);
+		cout << s1.c_str() << endl;
+
+		//s1.reserve(5);
+		//cout << s1.c_str() << endl;
 	}
 }
 
