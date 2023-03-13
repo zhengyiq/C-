@@ -21,7 +21,7 @@ public:
 
 int main()
 {
-	zyq::Testvector9();
+	zyq::Testvector10();
 
 	//A(); // 生命周期只在这一行，因为这行之后没有人会用它
 	//A a1;

@@ -74,18 +74,24 @@ namespace zyq
 		//	}
 		//}
 
+		//vector(const vector<T>& v)
+		//	//:_start(nullptr)
+		//	//, _finish(nullptr)
+		//	//, _end_of_storage(nullptr)
+		//{
+		//	_start = new T[v.capacity()];
+		//	for (size_t i = 0; i < v.size(); ++i)
+		//	{
+		//		_start[i] = v._start[i]; // 这里的=需要运算符重载
+		//	}
+		//	_finish = _start + v.size();
+		//	_end_of_storage = _start + v.capacity();
+		//}
+
 		vector(const vector<T>& v)
-			//:_start(nullptr)
-			//, _finish(nullptr)
-			//, _end_of_storage(nullptr)
 		{
-			_start = new T[v.capacity()];
-			for (size_t i = 0; i < v.size(); ++i)
-			{
-				_start[i] = v._start[i]; // 这里的=需要运算符重载
-			}
-			_finish = _start + v.size();
-			_end_of_storage = _start + v.capacity();
+			vector<T> tmp(v.begin(), v.end());
+			swap(tmp);
 		}
 
 		~vector()
@@ -115,14 +121,17 @@ namespace zyq
 		}
 
 		// insert后默认pos失效，不能再使用
+		// insert拥有返回值，返回的是新插入元素的位置
 		iterator insert(iterator pos, const T& val) // 这里不能使用引用传参， v1.begin()返回的是临时对象，临时对象具有常性。
 		{
 			assert(pos >= _start);
 			assert(pos <= _finish);
-			if (size() + 1 > capacity())
+			//if (size() + 1 > capacity())
+			if (_finish == _end_of_storage)
 			{
 				size_t len = pos - _start; // 若是遇到了需要扩容的问题pos指针的指向会发生变化失效，需要有记录来确保其不会失效
 				reserve(size() + 1);
+				// 扩容后更新pos，解决pos失效的问题
 				pos = _start + len;
 			}
 			iterator end = _finish - 1;
@@ -236,14 +245,25 @@ namespace zyq
 			return _start[pos];
 		}
 
-		vector<T>& operator=(const vector<T>& v)
+		void swap(vector<T>& v)
 		{
-			reserve(v.capacity());
-			for (auto e : v)
-			{
-				push_back(e);
-			}
-			return *this;
+			std::swap(_start, v._start);
+			std::swap(_finish, v._finish);
+			std::swap(_end_of_storage, v._end_of_storage);
+		}
+
+		// v1 = v2
+		vector<T>& operator=(vector<T> v)
+		{
+			//reserve(v.capacity());
+			//for (auto e : v)
+			//{
+			//	push_back(e);
+			//}
+			//return *this;
+			swap(v);
+
+			return *this; 
 		}
 
 	private:
@@ -299,7 +319,7 @@ namespace zyq
 		// 内置类型有没有构造函数
 		int x = int();
 		int y = int(1);
-		//int* z = int* ();
+		//int* z = int* (); // err
 		
 		f<int>();
 		f<int*>();
@@ -574,5 +594,24 @@ namespace zyq
 				cout << endl;
 			}
 			cout << endl;
+		}
+
+		void Testvector10()
+		{
+			std::vector<int> v1(10, 5);
+			for (auto e : v1)
+			{
+				cout << e << " ";
+			}
+			cout << endl;
+
+			v1.reserve(2);
+
+			for (auto e : v1)
+			{
+				cout << e << " ";
+			}
+			cout << endl;
+		
 		}
 }
