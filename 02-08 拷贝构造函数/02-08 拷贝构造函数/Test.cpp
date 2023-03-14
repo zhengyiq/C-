@@ -401,20 +401,99 @@ private:
 	int _a;
 };
 
-int main()
+//int main()
+//{
+//	//TestDate1();
+//	//TestDate2();
+//	//TestDate3();
+//	//TestDate4();
+//	//TestDate5();
+//	//TestDate6();
+//
+//	const A aa;
+//	aa.Print(); // err 权限的放大
+//
+//	cout << &aa << endl;
+//
+//	return 0;
+//}
+
+#include <iostream>
+using namespace std;
+
+int getDay(int _year, int _month, int _day)
 {
-	//TestDate1();
-	//TestDate2();
-	//TestDate3();
-	//TestDate4();
-	//TestDate5();
-	//TestDate6();
+    int Month_Day[13] = { 0, 31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31 };
+    int day = 0;
+    int flag = 0;
+    if (_month > 2 && ((_year % 4 == 0 && _year % 100 != 0) || (_year % 400 == 0)))
+    {
+        flag = 1;
+    }
+    while (_month - 1 > 0)
+    {
+        day += Month_Day[_month - 1];
+        _month--;
+    }
+    cout << day << endl;
+    if (flag == 1)
+    {
+        ++day;
+    }
+    return day + _day;
 
-	const A aa;
-	aa.Print(); // err 权限的放大
 
-	cout << &aa << endl;
-
-	return 0;
 }
+
+int main() {
+    int Max = 0, Min = 0;
+    cin >> Max >> Min;
+    int Max_year = 0, Max_month = 0, Max_day = 0;
+    int Min_year = 0, Min_month = 0, Min_day = 0;
+    Max_day = Max % 100;
+    Max_month = Max % 100 % 100;
+    Max_year = Max / 10000;
+
+    Min_day = Min % 100;
+    Min_month = Min % 100 % 100;
+    Min_year = Min / 10000;
+
+    // 当年的天数
+    int Maxday = getDay(Max_year, Max_month, Max_day);
+    int Minday = getDay(Min_year, Min_month, Min_day);
+
+    cout << Maxday << endl;
+
+    if (Max_year == Min_year)
+    {
+        return abs(Maxday - Minday);
+    }
+
+    if (Max_year < Min_year)
+    {
+        int tmp = Max_year;
+        Max_year = Min_year;
+        Min_year = tmp;
+        tmp = Maxday;
+        Maxday = Minday;
+        Minday = tmp;
+    }
+
+    while (Max_year > Min_year)
+    {
+        if ((Max_year % 4 == 0 && Max_year % 100 != 0) || (Max_year % 400 == 0))
+        {
+            Maxday += 366;
+        }
+        else {
+            {
+                Maxday += 365;
+            }
+        }
+        Max_year--;
+    }
+
+    return abs(Maxday - Minday);
+}
+// 64 位输出请用 printf("%lld")
 

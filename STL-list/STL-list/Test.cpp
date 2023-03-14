@@ -82,7 +82,7 @@ int main()
 	//test_list2();
 	//test_op();
 
-	zyq::test_list3();
+	zyq::test_list5();
 
 	return 0;
 }

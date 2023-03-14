@@ -123,11 +123,74 @@ namespace zyq
 			return const_iterator(_head);
 		}
 
-		list()
+		void empty_init()
 		{
 			_head = new node;
 			_head->_next = _head;
 			_head->_prev = _head;
+		}
+
+		list()
+		{
+			empty_init();
+		}
+
+		template<class Iterator>
+		list(Iterator first, Iterator last)
+		{
+			empty_init();
+
+			while (first != last)
+			{
+				push_back(*first);
+				++first;
+			}
+		}
+
+		// lt2(lt1)
+		//list(const list<T>& lt)
+		//{
+		//	empty_init();
+
+		//	for (auto e : lt)
+		//	{
+		//		push_back(e);
+		//	}
+		//}
+
+		void swap(list<T>& tmp)
+		{
+			empty_init(); // 这里需要注意头地址是否有意义的问题
+
+			std::swap(_head, tmp._head);
+		}
+
+		list(const list<T>& lt)
+		{
+			list<T> tmp(lt.begin(), lt.end());
+			swap(tmp);
+		}
+		
+		~list()
+		{
+			clear();
+			delete _head;
+			_head = nullptr;
+		}
+
+		void clear()
+		{
+			iterator it = begin();
+			while (it != end())
+			{
+				it = erase(it);
+				//erase(it++); // 这样也可以it++返回的是it的拷贝
+			}
+		}
+
+		void empty()
+		{
+
 		}
 
 		void push_back(const T& x)
@@ -170,7 +233,7 @@ namespace zyq
 			cur->_prev = new_node;
 		}
 
-		void erase(iterator pos)
+		iterator erase(iterator pos)
 		{
 			assert(pos != end());
 
@@ -180,6 +243,16 @@ namespace zyq
 			prev->_next = next;
 			next->_prev = prev;
 			delete pos._node;
+
+			return iterator(next);
+		}
+
+		// 这里不能使用&，会对原数据进行修改，这是本不需要的
+		list<T>& operator=(list<T> lt) // 这里的swap需要对内部的头指针进行修改所以不能使用const修饰
+		{
+			swap(lt);
+			
+			return *this;
 		}
 
 	private:
@@ -207,6 +280,10 @@ namespace zyq
 	void test_list1()
 	{
 		list<int> l1;
+		
+		const list<int> l2; // const对象在定义的时候没有const属性
+		const int i = 10;
+
 
 		l1.push_back(1);
 		l1.push_back(2);
@@ -296,6 +373,84 @@ namespace zyq
 		lt.pop_front();
 
 		for (auto e : lt)
+		{
+			cout << e << " ";
+		}
+		cout << endl;
+	}
+
+	void test_list4()
+	{
+		list<int> lt;
+		lt.push_back(1);
+		lt.push_back(2);
+		lt.push_back(3);
+		lt.push_back(4);
+
+		for (auto e : lt)
+		{
+			cout << e << " ";
+		}
+		cout << endl;
+	
+		lt.clear();
+
+		lt.push_back(1);
+		lt.push_back(2);
+		lt.push_back(3);
+		lt.push_back(4);
+
+		for (auto e : lt)
+		{
+			cout << e << " ";
+		}
+		cout << endl;
+	}
+
+	void test_list5()
+	{
+		list<int> lt;
+		lt.push_back(1);
+		lt.push_back(2);
+		lt.push_back(3);
+		lt.push_back(4);
+		
+		for (auto e : lt)
+		{
+			cout << e << " ";
+		}
+		cout << endl;
+
+		list<int> lt2(lt);
+	
+		for (auto e : lt)
+		{
+			cout << e << " ";
+		}
+		cout << endl;
+	
+		list<int> lt3;
+
+		lt3.push_back(10);
+		lt3.push_back(10);
+		lt3.push_back(10);
+		lt3.push_back(10);
+
+		for (auto e : lt3)
+		{
+			cout << e << " ";
+		}
+		cout << endl;
+
+		lt3 = lt;
+
+		for (auto e : lt)
+		{
+			cout << e << " ";
+		}
+		cout << endl;
+
+		for (auto e : lt3)
 		{
 			cout << e << " ";
 		}
