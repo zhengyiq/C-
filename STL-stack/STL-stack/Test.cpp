@@ -2,11 +2,15 @@
 #include <stack>
 #include <vector>
 #include <list>
+#include <assert.h>
 
 using namespace std;
-
+#include "Iterator.h"
 #include "queue.h"
 #include "stack.h"
+#include "priority_queue.h"
+#include "List.h"
+#include "vector.h"
 
 void test_stack()
 {
@@ -29,8 +33,11 @@ void test_stack()
 
 int main()
 {
-	test_stack();
-	zyq::test_queue();
-
+	//test_stack();
+	//zyq::test_queue();
+	//zyq::test_priority_queue1();
+	//zyq::TestPriorityQueue();
+	//zyq::test_list6();
+	zyq::Testvector11();
 	return 0;
 }

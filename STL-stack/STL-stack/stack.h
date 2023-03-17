@@ -3,7 +3,8 @@
 namespace zyq {
 
 	// ÊÊÅäÆ÷Ä£Ê½/Åä½ÓÆ÷
-	template<class T, class Container = vector<T>>
+	//template<class T, class Container = vector<T>>
+	template<class T, class Container = deque<T>>
 	class stack
 	{
 	public:

@@ -172,7 +172,7 @@ namespace zyq
 		}
 		
 		~list()
-		{
+		{ 
 			clear();
 			delete _head;
 			_head = nullptr;

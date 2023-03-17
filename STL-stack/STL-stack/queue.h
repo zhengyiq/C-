@@ -2,7 +2,8 @@
 namespace zyq
 {
 	// 适配器模式/配接器
-	template<class T, class Container = list<T>>
+	//template<class T, class Container = list<T>>
+	template<class T, class Container = deque<T>>
 	class queue
 	{
 	public:
@@ -57,3 +58,14 @@ namespace zyq
 
 	}
 }
+
+// deque 优点
+// 相比vector，扩容代价低 
+// 头插头删，尾插尾删效率高
+// 支持随机访问
+
+// 缺点
+// 中间插入删除很难搞，每个buffer大小不同（影响随机访问），或者每个buffer数组固定大小（保证随机访问影响插入）；效率高会影响随机访问效率变低，牺牲中间插入删除的效率，随机访问效率变高
+// SGI选择固定大小
+// 没有vector和list极致
+ 
