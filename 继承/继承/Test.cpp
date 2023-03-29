@@ -371,9 +371,9 @@
 
 
 
-#include <iostream>
-
-using namespace std;
+//#include <iostream>
+//
+//using namespace std;
 
 //class Person
 //{
@@ -405,48 +405,80 @@ using namespace std;
 //	a.Teacher::_name = "yyy";
 //}
 
+//class A
+//{
+//public:
+//	int _a1;
+//	int* _a3;
+//};
+//
+//// class B : public A
+//class B : virtual public A
+//{
+//public:
+//	int _b;
+//};
+//
+//// class C : public A
+//class C : virtual public A
+//{
+//public:
+//	int _c;
+//};
+//
+//class D : public B, public C
+//{
+//public:
+//	int _d;
+//};
+//int main()
+//{
+//	int n = 2;
+//	D d, d1, d2;
+//	d.B::_a1 = 1;
+//	d.C::_a3 = &n;
+//	d._b = 3;
+//	d._c = 4;
+//	d._d = 5;
+//
+//
+//	//B b;
+//	//b._a = 10;
+//	//b._b = 20;
+//	return 0;
+//}
+#include <iostream>
+using namespace std;
 class A
 {
 public:
-	int _a1;
-	int* _a3;
+	A(const char* s) { cout << s << endl; }
+	~A(){}
 };
-
-// class B : public A
 class B : virtual public A
 {
 public:
-	int _b;
+	B(const char* s1, const char* s2) :A(s1) { cout << s2 << endl; }
 };
-
-// class C : public A
 class C : virtual public A
 {
 public:
-	int _c;
+	C(const char* s1, const char* s2) :A(s1) { cout << s2 << endl; }
 };
-
 class D : public B, public C
 {
 public:
-	int _d;
+	D(const char* s1, const char* s2, const char* s3, const char* s4) :B(s1, s2), C(s1, s3), A(s1) { cout << s4 << endl; }
 };
+
 int main()
 {
-	int n = 2;
-	D d, d1, d2;
-	d.B::_a1 = 1;
-	d.C::_a3 = &n;
-	d._b = 3;
-	d._c = 4;
-	d._d = 5;
-
-
-	//B b;
-	//b._a = 10;
-	//b._b = 20;
+	D* p = new D("A", "B", "C", "D");
+	delete p;
 	return 0;
 }
+
+
 
 //// Car和BMW Car和Benz构成is-a的关系
 //class Car {
@@ -474,3 +506,4 @@ int main()
 //	string _num = "陕ABIT00"; // 车牌号
 //	Tire _t; // 轮胎
 //};
+
