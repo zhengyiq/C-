@@ -277,36 +277,254 @@ using namespace std;
 //}
 
 
-class Person {
-public:
-	virtual void BuyTicket() { cout << "买票-全价" << endl; }
-	virtual void Func() { cout << "买票-全价" << endl; }
+//class Person {
+//public:
+//	virtual void BuyTicket() { cout << "买票-全价" << endl; }
+//	virtual void Func() { cout << "买票-全价" << endl; }
+//
+//	int _a = 0;
+//
+//};
+//
+//class Student : public Person {
+//public:
+//	virtual void BuyTicket() { cout << "买票-半价" << endl; }
+//
+//	int _b = 1;
+//};
+//
+//void Func(Person p)
+//{
+//	p.BuyTicket();
+//}
+//
+//int main()
+//{
+//	//Person mike;
+//	//Func(mike);
+//
+//	Student johnson;
+//	Func(johnson);
+//
+//	Person mike = johnson;
+//
+//	return 0;
+//}
 
-	int _a = 0;
+////////////////////////////////////////////////////////////4月4日////////////////////////////////////////////
 
-};
+//class Base
+//{
+//public:
+//	Base()
+//		:_b(10)
+//	{
+//		++_b;
+//	}
+//
+//	virtual void Func1()
+//	{
+//		cout << "Base::Func1()" << endl;
+//	}
+//
+//	virtual void Func2()
+//	{
+//		cout << "Base::Func2()" << endl;
+//	}
+//
+//	void Func3()
+//	{
+//		cout << "Base::Func3()" << endl;
+//	}
+//
+//private:
+//	int _b = 1;
+//};
+//
+//class Derive : public Base
+//{
+//public:
+//	virtual void Func1()
+//	{
+//		cout << "Derive::Func1()" << endl;
+//	}
+//
+//	virtual void Func4()
+//	{
+//		cout << "Derive::Func4()" << endl;
+//	}
+//private:
+//	int _d = 2;
+//};
+//
+//// 用程序打印虚表
+//typedef void(*VF_PTR)(); // 声明一个函数指针，函数指针与一般的typedef不同，不能够写成这样的形式 typedef void(*)() VF_PTR
+//
+////void PrintVFTable(VF_PTR table[])
+//void PrintVFTable(VF_PTR* table)
+//{
+//	for (int i = 0; table[i] != nullptr; ++i)
+//	{
+//		printf("[%d]:%p->", i, table[i]);
+//		VF_PTR f = table[i];
+//		f();
+//	}
+//	cout << endl;
+//}
 
-class Student : public Person {
-public:
-	virtual void BuyTicket() { cout << "买票-半价" << endl; }
+//int main()
+//{
+//	Base b;
+//	Derive d;
+//	
+//	// 有两种方式：
+//	// 第一种方式有缺陷只能在32位的系统下使用，若是转换到了64位的系统就需要使用一种占据八个字节的指针
+//	// 第二种方式就是直接使用*(VF_PTR**)的方法
+//	//PrintVFTable((VF_PTR*)*(int*)&b);
+//	//PrintVFTable((VF_PTR*)*(int*)&d);
+//	PrintVFTable(*(VF_PTR**)&b);
+//	PrintVFTable(*(VF_PTR**)&d);
+//
+//	// 虚表是在什么时候生成？ -- 编译
+//	// 对象中的虚表指针是在什么时候初始化的？ -- 构造函数的初始化列表
+//	// 虚表存在哪里？-- 常量区，代码段
+//
+//	return 0;
+//}
 
-	int _b = 1;
-};
+//int main()
+//{
+//	Base b;
+//	Derive d;
+//
+//	int x = 0;
+//	static int y = 0;
+//	int* z = new int;
+//	const char* p = "xxxxxxxxxxxxxxxxxx";
+//
+//	printf("栈对象：%p\n", &x);
+//	printf("堆对象：%p\n", z);
+//	printf("静态区对象：%p\n", &y);
+//	printf("常量区对象：%p\n", p);
+//	printf("b对象虚表：%p\n", *((int*)&b));
+//	printf("d对象虚表：%p\n", *((int*)&d));
+//	return 0;
+//}
 
-void Func(Person p)
+
+//class Base1 {
+//public:
+//	virtual void func1() { cout << "Base1::func1" << endl; }
+//	virtual void func2() { cout << "Base1::func2" << endl; }
+//private:
+//	int bb;
+//	int b1;
+//};
+//
+//class Base2 {
+//public:
+//	virtual void func1() { cout << "Base2::func1" << endl; }
+//	virtual void func2() { cout << "Base2::func2" << endl; }
+//private:
+//	int b2;
+//};
+//
+//class Derive : public Base1, public Base2 {
+//public:
+//	virtual void func1() { cout << "Derive::func1" << endl; }
+//	virtual void func3() { cout << "Derive::func3" << endl; }
+//private:
+//	int d1;
+//};
+//
+//// 用程序打印虚表
+//typedef void(*VF_PTR)(); // 声明一个函数指针，函数指针与一般的typedef不同，不能够写成这样的形式 typedef void(*)() VF_PTR
+//
+////void PrintVFTable(VF_PTR table[])
+//void PrintVFTable(VF_PTR* table)
+//{
+//	for (int i = 0; table[i] != nullptr; ++i)
+//	{
+//		printf("[%d]:%p->", i, table[i]);
+//		VF_PTR f = table[i];
+//		f();
+//	}
+//	cout << endl;
+//}
+
+//int main()
+//{
+//	Derive d;
+//	PrintVFTable((VF_PTR*)(*(int*)&d));
+//	PrintVFTable((VF_PTR*)(*(int*)((char*)&d+sizeof(Base1)))); // 这里先要将&dDerive*类型的地址转换为char*的地址才能加上Base1的大小，在与之前一样转换为int*类型再解引用转换成VF_PTR*类型即可
+//	//Base2* ptr2 = &d; // 简便的方法是我们可以对Derive类进行切片获得的自然就是Base2的地址。
+//	//PrintVFTable((VF_PTR*)(*(int*)(ptr2)));
+//	return 0;
+//}
+
+//int main()
+//{
+//	Derive d;
+//	Base1* ptr1 = &d;
+//	Base2* ptr2 = &d;
+//	ptr1->func1();
+// 
+//	ptr2->func1();
+//	return 0;
+//}
+
+class A
 {
-	p.BuyTicket();
-}
+public:
+	virtual void func1()
+	{}
+public:
+	int _a;
+};
+
+class B : virtual public A
+{
+public:
+	virtual void func1()
+	{}
+
+	virtual void func2()
+	{}
+public:
+	int _b;
+};
+
+class C : virtual public A
+{
+public:
+	virtual void func1()
+	{}
+
+	virtual void func3()
+	{}
+public:
+	int _c;
+};
+
+class D : public B, public C
+{
+public:
+	virtual void func1()
+	{
+
+	}
+public:
+	int _d;
+};
 
 int main()
 {
-	//Person mike;
-	//Func(mike);
-
-	Student johnson;
-	Func(johnson);
-
-	Person mike = johnson;
+	D d;
+	d.B::_a = 1;
+	d.C::_a = 2;
+	d._b = 3;
+	d._c = 4;
+	d._d = 5;
 
 	return 0;
 }
