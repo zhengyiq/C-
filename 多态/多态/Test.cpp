@@ -473,58 +473,137 @@ using namespace std;
 //	return 0;
 //}
 
-class A
-{
-public:
-	virtual void func1()
-	{}
-public:
-	int _a;
-};
+//class A
+//{
+//public:
+//	virtual void func1()
+//	{}
+//public:
+//	int _a;
+//};
+//
+//class B : virtual public A
+//{
+//public:
+//	virtual void func1()
+//	{}
+//
+//	virtual void func2()
+//	{}
+//public:
+//	int _b;
+//};
+//
+//class C : virtual public A
+//{
+//public:
+//	virtual void func1()
+//	{}
+//
+//	virtual void func3()
+//	{}
+//public:
+//	int _c;
+//};
+//
+//class D : public B, public C
+//{
+//public:
+//	virtual void func1()
+//	{
+//
+//	}
+//public:
+//	int _d;
+//};
+//
+//int main()
+//{
+//	D d;
+//	d.B::_a = 1;
+//	d.C::_a = 2;
+//	d._b = 3;
+//	d._c = 4;
+//	d._d = 5;
+//
+//	return 0;
+//}
+//
+//1. 什么是多态？答：参考本节课件内容
+// 静态多态 + 动态多态
 
-class B : virtual public A
-{
-public:
-	virtual void func1()
-	{}
+//2. 什么是重载、重写(覆盖)、重定义(隐藏)？答：参考本节课件内容
 
-	virtual void func2()
-	{}
-public:
-	int _b;
-};
+//3. 多态的实现原理？答：参考本节课件内容
 
-class C : virtual public A
-{
-public:
-	virtual void func1()
-	{}
+//4. inline函数可以是虚函数吗？答：可以，不过编译器就忽略inline属性，这个函数就不再是inline，因为虚函数要放到虚表中去。
+//内联函数没有地址，不能声明定义分离。虚函数的地址需要放到虚表中
+//class A 
+//{
+//public:
+//	inline virtual void func() // 可以编译通过，内联只是对编译器的一个建议不一定要执行
+//	{}
+//};
+//int main()
+//{
+//	A a;
+//	a.func();
+//}
 
-	virtual void func3()
-	{}
-public:
-	int _c;
-};
+//5. 静态成员可以是虚函数吗？答：不能，因为静态成员函数没有this指针，使用类型::成员函数的调用方式无法访问虚函数表，所以静态成员函数无法放进虚函数表。
 
-class D : public B, public C
+//6. 构造函数可以是虚函数吗？答：不能，因为对象中的虚函数表指针是在构造函数初始化列表阶段才初始化的。
+// 拷贝构造和构造类似 赋值，拷贝构造，构造是一种合成版本，子类来调用父类，重写之后是非父即子的关系
+// 赋值可以使虚函数但是，最好不要
+
+//7. 析构函数可以是虚函数吗？什么场景下析构函数是虚函数？答：可以，并且最好把基类的析构函数定义成虚函数。参考本节课件内容
+
+//8. 对象访问普通函数快还是虚函数更快？答：首先如果是普通对象，是一样快的。如果是指针对象或者是引用对象，则调用的普通函数快，因为构成多态，运行时调用虚函数需要到虚函数表中去查找。
+class A 
 {
 public:
 	virtual void func1()
 	{
-
+		cout << "func1()" << endl;
 	}
-public:
-	int _d;
-};
 
+	void func2()
+	{
+		cout << "func2()" << endl;
+	}
+};
 int main()
 {
-	D d;
-	d.B::_a = 1;
-	d.C::_a = 2;
-	d._b = 3;
-	d._c = 4;
-	d._d = 5;
+	A a;
+	a.func1();
+	//a.func1();
+	//	004626F7  lea         ecx, [a]
+	//	004626FA  call        A::func1(04613C5h)
+	a.func2();
+	//a.func2();
+	//	004626FF  lea         ecx, [a]
+	//	00462702  call        A::func2(0461343h)
 
-	return 0;
+	A* ptr = &a;
+	ptr->func1(); // 多态调用，如果识别成普通调用，成本太高
+
+	//ptr->func1(); // 多态调用
+	//	002D270D  mov         eax, dword ptr[ptr]
+	//	002D2710  mov         edx, dword ptr[eax]
+	//	002D2712  mov         esi, esp
+	//	002D2714  mov         ecx, dword ptr[ptr]
+	//	002D2717  mov         eax, dword ptr[edx]
+	//	002D2719  call        eax
+	//	002D271B  cmp         esi, esp
+	//	002D271D  call        __RTC_CheckEsp(02D129Eh)
 }
+
+
+
+//9. 虚函数表是在什么阶段生成的，存在哪的？答：虚函数表是在编译阶段就生成的，一般情况下存在代码段(常量区)的。
+// 虚表指针在构造函数初始化列表初始化
+
+
+//10. C++菱形继承的问题？虚继承的原理？答：参考继承课件。注意这里不要把虚函数表和虚基表搞混了。
+
+//11. 什么是抽象类？抽象类的作用？答：参考（3.抽象类）。抽象类强制重写了虚函数，另外抽象类体现出了接口继承关系。
