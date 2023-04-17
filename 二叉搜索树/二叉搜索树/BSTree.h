@@ -84,7 +84,8 @@ public:
 	bool Erase(const K& key)
 	{
 		Node* cur = _root;
-		Node* parent = cur; // 这里不能为空，否则删除根节点的时候就会发生报错
+		//Node* parent = cur; // 这里不能为空，否则删除根节点的时候就会发生报错
+		Node* parent = nullptr; // 这里为空时在删除根节点的时候需要进行处理
 		while (cur)
 		{
 			if (cur->_key < key)
@@ -109,6 +110,7 @@ public:
 						delete parent;
 						return true;
 					}
+
 					if (parent->_left == cur)
 					{
 						parent->_left = cur->_right;
@@ -129,6 +131,7 @@ public:
 						delete parent;
 						return true;
 					}
+				
 					if (parent->_right == cur)
 					{
 						parent->_right = cur->_left;
@@ -176,6 +179,63 @@ public:
 	void InOrder()
 	{
 		_InOrder(_root);
+	}
+
+
+	bool _EraseR(Node*& root, const K& key)
+	{
+		if (root == nullptr)
+			return false;
+
+		if (root->_key < key)
+		{
+			return _EraseR(root->_right, key);
+		}
+		else if (root->_key > key)
+		{
+			return _EraseR(root->_left, key);
+		}
+		else // root->_key = key
+		{
+			Node* del = root;
+			// 开始准备删除
+			// 左节点为空
+			if (root->_left == nullptr)
+			{
+				root = root->_right;
+			}
+			// 右节点为空
+			else if (root->_right == nullptr)
+			{
+				root = root->_left;
+			}
+			else // 左右节点都不为空
+			{
+				Node* maxleft = root->_left;
+				while (max->left = _right)
+				{
+					maxleft = maxleft->_right;
+				}
+				
+				swap(root->_key. maxleft->_left);
+				
+				return _EraseR(root->_left, key) // 转换成子树去删除
+
+				/*Node* max = FindLeftMax(root->_left);
+				swap(max->key, root->key);
+				delete max;*/
+			}
+			delete del;
+			return true;
+		}
+	}
+
+	Node* FindLeftMax(Node node)
+	{
+		while (node->_right)
+		{
+			node = node->_right;
+		}
 	}
 
 
