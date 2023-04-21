@@ -5,45 +5,45 @@ using namespace std;
 #include "BSTree.h"
 
 
-//void TestBSTree()
-//{
-//	int a[] = { 8, 3, 1, 10, 6, 4, 7, 14, 13 };
-//	BSTree<int> t1;
-//	t1.InsertR(8);
-//	t1.InsertR(3);
-//	t1.InsertR(1);
-//	t1.InsertR(10);
-//	t1.InsertR(6);
-//	t1.InsertR(4);
-//	t1.InsertR(7);
-//	t1.InsertR(14);
-//	t1.InsertR(13);
-//	t1.InOrder();
-//	cout << endl;
-//
-//	//t1.Erase(4);
-//	//t1.InOrder();
-//	//cout << endl;
-//
-//	//t1.Erase(14);
-//	//t1.InOrder();
-//	//cout << endl;
-//
-//	//t1.Erase(3);
-//	//t1.InOrder();
-//	//cout << endl;
-//
-//	//t1.Erase(8);
-//	//t1.InOrder();
-//	//cout << endl;
-//
-//	for (auto e : a)
-//	{
-//		t1.Erase(e);
-//		t1.InOrder();
-//		cout << endl;
-//	}
-//}
+void TestBSTree()
+{
+	int a[] = { 8, 3, 1, 10, 6, 4, 7, 14, 13 };
+	key::BSTree<int> t1;
+	t1.InsertR(8);
+	t1.InsertR(3);
+	t1.InsertR(1);
+	t1.InsertR(10);
+	t1.InsertR(6);
+	t1.InsertR(4);
+	t1.InsertR(7);
+	t1.InsertR(14);
+	t1.InsertR(13);
+	t1.InOrder();
+	cout << endl;
+
+	//t1.Erase(4);
+	//t1.InOrder();
+	//cout << endl;
+
+	//t1.Erase(14);
+	//t1.InOrder();
+	//cout << endl;
+
+	//t1.Erase(3);
+	//t1.InOrder();
+	//cout << endl;
+
+	//t1.Erase(8);
+	//t1.InOrder();
+	//cout << endl;
+
+	for (auto e : a)
+	{
+		t1.EraseR(e);
+		t1.InOrder();
+		cout << endl;
+	}
+}
 
 void TestBSTree4()
 {
@@ -94,8 +94,8 @@ void TestBSTree5()
 
 int main()
 {
-	//TestBSTree();
-	TestBSTree4();
+	TestBSTree();
+	//TestBSTree4();
 	//TestBSTree5();
 	return 0;
 }

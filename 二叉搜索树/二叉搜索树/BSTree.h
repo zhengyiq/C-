@@ -45,41 +45,33 @@ namespace key
 		}
 
 
-		bool Insert(const K& key)
-		{
-			if (_root == nullptr)
-			{
+		bool Insert(const K& key) {
+			if (_root == nullptr) {
 				_root = new Node(key);
 				return true;
 			}
 
-			Node* parent = nullptr;
+			Node* parent = nullptr;// 需要记录父节点的位置，将要插入的节点链接在父节点之后
 			Node* cur = _root;
-			while (cur)
-			{
-				if (key > cur->_key)
-				{
+			while (cur) {
+				if (key > cur->_key) {
 					parent = cur;
 					cur = cur->_right;
 				}
-				else if (key < cur->_key)
-				{
+				else if (key < cur->_key) {
 					parent = cur;
 					cur = cur->_left;
 				}
-				else
-				{
+				else {
 					return false;
 				}
 			}
 
 			cur = new Node(key);
-			if (key > parent->_key)
-			{
+			if (key > parent->_key) {
 				parent->_right = cur;
 			}
-			else // key < parent->key
-			{
+			else { // key < parent->key
 				parent->_left = cur;
 			}
 			return true;
@@ -112,53 +104,43 @@ namespace key
 			Node* cur = _root;
 			Node* parent = cur; // 这里不能为空，否则删除根节点的时候就会发生报错
 			//Node* parent = nullptr; // 这里为空时在删除根节点的时候需要进行处理
-			while (cur)
-			{
-				if (cur->_key < key)
-				{
+			while (cur) {
+				if (cur->_key < key) {
 					parent = cur;
 					cur = cur->_right;
 				}
-				else if (cur->_key > key)
-				{
+				else if (cur->_key > key) {
 					parent = cur;
 					cur = cur->_left;
 				}
-				else
-				{
+				else {
 					// 要删除的节点左节点为空值
-					if (cur->_left == nullptr)
-					{
-						if (cur == parent) // cur == _root
-						{
+					if (cur->_left == nullptr) {
+						// 如果要删除的结点是根结点，且根结点的左子树为空，那么就需要对_root进行修改
+						if (cur == parent) { // cur == _root
 							//cur = cur->_right; // err
 							_root = cur->_right;
 						}
 
-						if (parent->_left == cur)
-						{
+						if (parent->_left == cur) {
 							parent->_left = cur->_right;
 						}
-						else
-						{
+						else {
 							parent->_right = cur->_right;
 						}
 						delete cur;
 					}
 					// 要删除的节点右节点为空值
-					else if (cur->_right == nullptr)
-					{
-						if (cur == parent) // cur == _root
-						{
+					else if (cur->_right == nullptr) {
+						// 如果要删除的结点是根结点，且根结点的右子树为空，那么就需要对_root进行修改
+						if (cur == parent) { // cur == _root
 							_root = cur->_left;
 						}
 
-						if (parent->_right == cur)
-						{
+						if (parent->_right == cur) {
 							parent->_right = cur->_left;
 						}
-						else
-						{
+						else {
 							parent->_left = cur->_left;
 						}
 						delete cur;
@@ -194,19 +176,16 @@ namespace key
 						Node* pmaxLeft = cur; // ?
 						Node* maxLeft = cur->_left;
 
-						while (maxLeft->_right)
-						{
+						while (maxLeft->_right) {
 							pmaxLeft = maxLeft;
 							maxLeft = maxLeft->_right;
 						}
 						cur->_key = maxLeft->_key;
 
-						if (pmaxLeft->_right == maxLeft)
-						{
+						if (pmaxLeft->_right == maxLeft) {
 							pmaxLeft->_right = maxLeft->_left;
 						}
-						else // pmaxLeft->left == maxLeft;
-						{
+						else { // pmaxLeft->left == maxLeft; 
 							pmaxLeft->_left = maxLeft->_left;
 						}
 
@@ -240,8 +219,7 @@ namespace key
 
 	protected:
 
-		Node* Copy(Node* root)
-		{
+		Node* Copy(Node* root) {
 			if (root == nullptr)
 				return nullptr;
 
@@ -266,27 +244,23 @@ namespace key
 
 		bool _InsertR(Node*& root, const K& key)
 		{
-			if (root == nullptr)
-			{
+			if (root == nullptr) { // 根节点为空就直接插入返回
 				root = new Node(key);
 				return true;
 			}
 
-			if (root->_key < key)
-			{
+			if (root->_key < key) { // 比根节点大在右树中进行递归查找
 				return _InsertR(root->_right, key);
 			}
-			else if (root->_key > key)
-			{
+			else if (root->_key > key) { // 比根节点小在左树中进行查找
 				return _InsertR(root->_left, key);
 			}
-			else
-			{
-				return false;
+			else {
+				return false; // 查找失败
 			}
 		}
 
-		bool _FindR(Node* root, const K& key)
+		bool _FindR(Node* root, const K& key)// 在递归的版本中我们需要编写两个函数因为我们需要传入头结点，而正常情况下头结点是私有的再类外无法访问到的，因此需要我们创建子函数进行处理。
 		{
 			if (root == nullptr)
 				return false;
@@ -300,59 +274,49 @@ namespace key
 				return _FindR(root->_right, key);
 		}
 
-		void _InOrder(Node* root) // 当前函数不好调用，不能使用缺省参数应为缺省参数的形式：Node* root = _root 因为没有this指针无法调用_root。 // 缺省值必须是常量或者是全局变量
+		 // 缺省值必须是常量或者是全局变量
+		
+		void _InOrder(Node* root) // 当前函数不好调用，不能使用缺省参数应为缺省参数的形式：Node* root = _root 因为没有this指针无法调用_root。_root是一个变量而缺省参数需要的是常量
 		{
 			if (root == nullptr)
 				return;
-
+		
 			_InOrder(root->_left);
 			cout << root->_key << " ";
 			_InOrder(root->_right);
 		}
-
-		bool _EraseR(Node*& root, const K& key)
-		{
+		// 这里特别需要注意的一点就是这里的Node*添加了一个引用，这样的话就可以让我们在删除的时候在该函数栈帧中传入root->_left或者root->_right，在这种情况下虽然我们操作的是要删除的节点，但是这个结点是链接在整棵二叉搜索树中的
+		bool _EraseR(Node*& root, const K& key) {
 			if (root == nullptr)
 				return false;
 
-			if (root->_key < key)
-			{
+			if (root->_key < key){
 				return _EraseR(root->_right, key);
 			}
-			else if (root->_key > key)
-			{
+			else if (root->_key > key) {
 				return _EraseR(root->_left, key);
 			}
-			else // root->_key = key
-			{
+			else { // root->_key = key
 				Node* del = root;
 				// 开始准备删除
 				// 左节点为空
-				if (root->_left == nullptr)
-				{
+				if (root->_left == nullptr) {
 					root = root->_right;
 				}
 				// 右节点为空
-				else if (root->_right == nullptr)
-				{
+				else if (root->_right == nullptr) {
 					root = root->_left;
 				}
-				else // 左右节点都不为空
-				{
+				else { // 左右节点都不为空 
 					Node* maxleft = root->_left;
-					while (maxleft->_right)
-					{
+					while (maxleft->_right) {
 						maxleft = maxleft->_right;
 					}
+					 
+					swap(root->_key, maxleft->_key); // 要删除的节点与左子树的最大值
 
-					swap(root->_key.maxleft->_left); // 要删除的节点与左子树的最大值
-
-					return _EraseR(root->_left, key); // 转换成子树去删除
-					//return _EraseR(maxleft->_left, key); // maxleft是一个局部变量，使用引用传入会发生报错
-
-					/*Node* max = FindLeftMax(root->_left);
-					swap(max->key, root->key);
-					delete max;*/
+					//return _EraseR(root->_left, key); // 转换成子树去删除
+					return _EraseR(maxleft, key); // maxleft是一个局部变量，使用引用传入会发生报错
 				}
 				delete del;
 				return true;
