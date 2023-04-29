@@ -110,6 +110,18 @@ public:
 				{
 					RotateR(parent);
 				}
+				else if (parent->_bf == -2 && cur->_bf == 1)
+				{
+					RotateLR(parent);
+				}
+				else if (parent->_bf == 2 && cur->_bf == -1)
+				{
+					RotateRL(parent);
+				}
+				else
+				{
+					assert(false);
+				}
 				break;
 			}
 			else
@@ -194,5 +206,72 @@ private:
 		parent->_bf = subL->_bf = 0; // 这里就需要将parent、subL的平衡因子进行修正
 	}
 
+	void RotateLR(Node* parent)
+	{
+		Node* subL = parent->_left;
+		Node* subLR = parent->_left->_right;
+		
+		int bf = subLR->_bf; // 这里需要记录subLR的平衡因子，用来确定后面旋转之后的平衡因子变化。
+
+		RotateL(parent->_left);
+		RotateR(parent);
+		if (bf == 1)
+		{
+			subL->_bf = -1;
+			parent->_bf = 0;
+			subLR->_bf = 0;
+		}
+		else if (bf == -1)
+		{
+			parent->_bf = 1;
+			subL->_bf = 0;
+			subLR->_bf = 0;
+		}
+		else if (bf == 0)
+		{
+			parent->_bf = 0;
+			subL->_bf = 0;
+			subLR->_bf = 0;
+		}
+		else
+		{
+			assert(false);
+		}
+	}
+
+	void RotateRL(Node* parent)
+	{
+		Node* subR = parent->_right;
+		Node* subRL = parent->_right->_left;
+
+		int bf = subRL->_bf; // 这里需要记录subLR的平衡因子，用来确定后面旋转之后的平衡因子变化。
+
+		RotateR(parent->_right);
+		RotateL(parent);
+		if (bf == 1)
+		{
+			parent->_bf = -1;
+			subR->_bf = 0;
+			subRL->_bf = 0;
+		}
+		else if (bf == -1)
+		{
+			parent->_bf = 0;
+			subR->_bf = 1;
+			subRL->_bf = 0;
+		}
+		else if (bf == 0)
+		{
+			parent->_bf = 0;
+			subR->_bf = 0;
+			subRL->_bf = 0;
+		}
+		else
+		{
+			assert(false);
+		}
+	}
+
+private:
 	Node* _root = nullptr;
 };
