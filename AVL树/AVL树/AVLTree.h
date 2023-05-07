@@ -1,7 +1,7 @@
 #pragma once
 
 template<class K, class V>
-class AVLTreeNode
+struct AVLTreeNode
 {
 	AVLTreeNode<K, V>* _left;
 	AVLTreeNode<K, V>* _right;
@@ -133,6 +133,23 @@ public:
 		return true;
 	}
 
+
+	void InOrder()
+	{
+		_InOrder(_root);
+		cout << endl;
+	}
+
+	bool IsBalance()
+	{
+		return _IsBalance(_root);
+	}
+
+	int Height()
+	{
+		return _Height(_root);
+	}
+
 private:
 
 	void RotateL(Node* parent)
@@ -140,17 +157,17 @@ private:
 		Node* subR = parent->_right;
 		Node* subRL = subR->_left;
 
-		parent->_right = sub_RL;
+		parent->_right = subRL;
 		if (subRL)
 		{
-			subRL->_parent = parent->_parent;
+			subRL->_parent = parent;
 		}
 		Node* ppNode = parent->_parent;
 		
 		subR->_left = parent;
 		parent->_parent = subR;
 
-		if (ppNode = nullptr)
+		if (ppNode == nullptr)
 		{
 			_root = subR;
 			subR->_parent = nullptr;
@@ -248,13 +265,13 @@ private:
 
 		RotateR(parent->_right);
 		RotateL(parent);
-		if (bf == 1)
+		if (bf == 1) // 插入在右子树的位置
 		{
 			parent->_bf = -1;
 			subR->_bf = 0;
 			subRL->_bf = 0;
 		}
-		else if (bf == -1)
+		else if (bf == -1) // 插入在左子树的位置
 		{
 			parent->_bf = 0;
 			subR->_bf = 1;
@@ -272,6 +289,83 @@ private:
 		}
 	}
 
+	void _InOrder(Node* root)
+	{
+		if (root == nullptr)
+			return;
+
+		_InOrder(root->_left);
+		cout << root->_kv.first << endl;
+		_InOrder(root->_right);
+	}
+
+	int _Height(Node* root)
+	{
+		if (root == nullptr)
+			return 0;
+		int leftH = _Height(root->_left);
+		int rightH = _Height(root->_right);
+
+		return leftH > rightH ? leftH + 1 : rightH + 1;
+	}
+
+	bool _IsBalance(Node* root)
+	{
+		if (root == nullptr)
+			return true;
+
+		int leftH = _Height(root->_left);
+		int rightH = _Height(root->_right);
+		
+		if (rightH - leftH != root->_bf)
+		{
+			cout << "节点平衡因子异常" << endl;
+			return false;
+		}
+
+		return abs(leftH - rightH) < 2 
+			&& _IsBalance(root->_left) // 这里需要递归进入子树来进行判断是否平衡 
+			&& _IsBalance(root->_right);
+	}
+
 private:
 	Node* _root = nullptr;
 };
+
+void Test_AVLTree1()
+{
+	//int a[] = { 16, 3, 7, 11, 9, 26, 18, 14, 15 };
+	int a[] = { 4, 2, 6, 1, 3, 5, 15, 7, 16, 14 };
+	AVLTree<int, int> t1;
+	for (auto e : a)
+	{
+		/*if (e == 14)
+		{
+			int x = 0;
+		}*/
+
+		t1.Insert(make_pair(e, e));
+		cout << e << "插入：" << t1.IsBalance() << endl;
+	}
+
+	t1.InOrder();
+	cout << t1.IsBalance() << endl;
+}
+
+void Test_AVLTree2()
+{
+	srand(time(0));
+	const size_t N = 5000000;
+	AVLTree<int, int> t;
+	for (size_t i = 0; i < N; ++i)
+	{
+		size_t x = rand() + i;
+		t.Insert(make_pair(x, x));
+		//cout << t.IsBalance() << endl;
+	}
+
+	//t.Inorder();
+
+	cout << t.IsBalance() << endl;
+	cout << t.Height() << endl;
+}
