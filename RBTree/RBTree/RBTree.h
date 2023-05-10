@@ -6,28 +6,116 @@ enum Colour
 	BLACK,
 };
 
-template<class K, class V>
+template<class T>
 struct RBTreeNode
 {
-	RBTreeNode<K, V>* _left;
-	RBTreeNode<K, V>* _right;
-	RBTreeNode<K, V>* _parent;
-	pair<K, V> _kv;
+	RBTreeNode<T>* _left;
+	RBTreeNode<T>* _right;
+	RBTreeNode<T>* _parent;
+	T _data;
 	Colour _col;
 
-	RBTreeNode(const pair<K, V>& kv)
+	RBTreeNode(const T& data)
 		:_left(nullptr)
 		, _right(nullptr)
 		, _parent(nullptr)
-		, _kv(kv)
+		, _data(data)
 		, _col(RED) // 新插入的节点如果时黑色一定会违反规则四，如果插入的是红色，有可能会违反规则三，因此在这里选择惩罚概率较小的规则三，选择新增插入的结点为红色
 	{}
 };
 
-template<class K, class V>
+template<class T, class Ref, class Ptr>
+struct __RBTreeIterator
+{
+	typedef RBTreeNode<T> Node;
+	typedef __RBTreeIterator<T, Ref, Ptr> Self;
+	
+	Node* _node;
+
+	__RBTreeIterator(Node* node)
+		:_node(node)
+	{}
+
+	Ref operator*()
+	{
+		return _node->_data;
+	}
+
+	Ptr operator->()
+	{
+		return &_node->_data;
+	}
+
+	bool operator!=(const Self& s)
+	{
+		return _node != s._node;
+	}
+
+	Self& operator++()
+	{
+		if (_node->_right)
+		{
+			// 右不为空，下一个就是右子树的最左节点
+			Node* subLeft = _node->_right;
+			while (subLeft->_left)
+			{
+				subLeft = subLeft->_left;
+			}
+
+			_node = subLeft;
+		}
+		//// 右子树为空，沿着根的结点，找孩子是父亲左的那个祖先
+		//else if (_node == _node->_parent->_right)
+		//{
+		//	_node = _node->_parent->_parent;
+		//}
+		//else/* if (_node == _node->_parent->_left)*/
+		//{
+		//	_node = _node->_parent;
+		//}
+		else
+		{
+			// 右子树为空，沿着根的结点，找孩子是父亲左的那个祖先
+			Node* parent = _node->_parent;
+			while (parent && _node == parent->_right)
+			{
+				_node = parent;
+				parent = parent->_parent;
+			}
+			if (_node->_right != parent)
+			{
+				_node = parent;
+			}
+		}
+		return *this;
+	}
+};
+
+// 通过仿函数来区分map与set
+template<class K, class T, class KeyofT>
 class RBTree
 {
-	typedef RBTreeNode<K, V> Node;
+	typedef RBTreeNode<T> Node;
+
+public:
+	typedef __RBTreeIterator<T, T&, T*> itertaor;
+	typedef __RBTreeIterator<T, const T&, const T*> const_itertaor;
+
+	itertaor begin()
+	{
+		Node* cur = _root;
+		while (cur && cur->_left)
+		{
+			cur = cur->_left;
+		}
+
+		return itertaor(cur);
+	}
+
+	itertaor end()
+	{
+		return itertaor(nullptr); // end是最后一个节点的下一个数据
+	}
 
 public:
 	~RBTree()
@@ -38,14 +126,15 @@ public:
 
 	Node* Find(const K& key)
 	{
+		KeyofT kot;
 		Node* cur = _root;
 		while (cur)
 		{
-			if (cur->_kv.first < key)
+			if (kot(cur->_data) < key)
 			{
 				cur = cur->_right;
 			}
-			else if (cur->_kv.first > key)
+			else if (kot(cur->_data) > key)
 			{
 				cur = cur->_left;
 			}
@@ -58,25 +147,26 @@ public:
 		return nullptr;
 	}
 
-	bool Insert(const pair<K, V>& kv)
+	bool Insert(const T& data)
 	{
 		if (_root == nullptr)
 		{
-			_root = new Node(kv);
+			_root = new Node(data);
 			_root->_col = BLACK; // 将根节点设置为黑色
 			return true;
 		}
 
+		KeyofT kot;
 		Node* parent = nullptr;
 		Node* cur = _root;
 		while (cur)
 		{
-			if (cur->_kv.first < kv.first)
+			if (kot(cur->_data) < kot(data))
 			{
 				parent = cur;
 				cur = cur->_right;
 			}
-			else if (cur->_kv.first > kv.first)
+			else if (kot(cur->_data) > kot(data))
 			{
 				parent = cur;
 				cur = cur->_left;
@@ -87,8 +177,8 @@ public:
 			}
 		}
 
-		cur = new Node(kv);
-		if (parent->_kv.first > kv.first)
+		cur = new Node(data);
+		if (kot(parent->_data) > kot(data))
 		{
 			parent->_left = cur;
 		}
@@ -294,7 +384,7 @@ private:
 		}
 
 		_InOrder(root->_left);
-		cout << root->_kv.first << " ";
+		cout << root->_data << " ";
 		_InOrder(root->_right);
 	}
 
@@ -368,42 +458,3 @@ private:
 private:
 	Node* _root = nullptr;
 };
-
-void Test_RBTree1()
-{
-	int a[] = { 16, 3, 7, 11, 9, 26, 18, 14, 15 };
-	//int a[] = { 4, 2, 6, 1, 3, 5, 15, 7, 16, 14, 16, 3, 7, 11, 9, 26, 18, 14, 15 };
-	RBTree<int, int> t1;
-	for (auto e : a)
-	{
-		/*	if (e == 14)
-		{
-		int x = 0;
-		}*/
-		//cout << e << endl;
-		t1.Insert(make_pair(e, e));
-		//cout << e << "插入：" << t1.IsBalance() << endl;
-	}
-
-	t1.InOrder();
-	cout << t1.IsBalance() << endl;
-}
-
-
-void Test_RBTree2()
-{
-	srand(time(0));
-	const size_t N = 5000000;
-	RBTree<int, int> t;
-	for (size_t i = 0; i < N; ++i)
-	{
-		size_t x = rand() + i;
-		t.Insert(make_pair(x, x));
-		//cout << t.IsBalance() << endl;
-	}
-
-	//t.Inorder();
-
-	cout << t.IsBalance() << endl;
-	cout << t.Height() << endl;
-}
