@@ -28,12 +28,23 @@ template<class T, class Ref, class Ptr>
 struct __RBTreeIterator
 {
 	typedef RBTreeNode<T> Node;
-	typedef __RBTreeIterator<T, Ref, Ptr> Self;
+	typedef __RBTreeIterator<T, Ref, Ptr> Self;	
+
+	typedef __RBTreeIterator<T, T&, T*> iterator;
+	typedef __RBTreeIterator<T, const T&, const T*> const_iterator;
+
+	// 1、typedef __RBTreeIterator<T, T&, T*> itertaor;  拷贝构造
+	// 2、 typedef __RBTreeIterator<T, const T&, const T*> const_itertaor;
+	//  支持普通迭代器构造const迭代器的构造函数
 	
 	Node* _node;
 
 	__RBTreeIterator(Node* node)
 		:_node(node)
+	{}
+
+	__RBTreeIterator(const iterator& it)
+		:_node(it._node)
 	{}
 
 	Ref operator*()
@@ -64,6 +75,136 @@ struct __RBTreeIterator
 
 			_node = subLeft;
 		}
+		else
+		{
+			// 右子树为空，沿着根的结点，找孩子是父亲左的那个祖先
+			Node* cur = _node;
+			Node* parent = cur->_parent;
+			while (parent && cur == parent->_right)
+			{
+				cur = parent;
+				parent = parent->_parent;
+			}
+			
+			_node = parent;
+		}
+		return *this;
+	}
+
+	Self& operator--()
+	{
+		if (_node->_left)
+		{
+			// 左不为空，找左子树的最右节点
+			Node* subRight = _node->_left;
+			while (subRight->_right)
+			{
+				subRight = subRight->_right;
+			}
+
+			_node = subRight;
+		}
+		else
+		{
+			// 左为空，孩子是父亲右的那个祖先
+			Node* parent = _node->_parent;
+			while (parent && _node == parent->_left)
+			{
+				_node = parent;
+				parent = parent->_parent;
+			}
+
+			_node = parent;
+		}
+		return *this;
+	}
+};
+
+template<class T, class Ref, class Ptr>
+struct __RBReverse_TreeIterator
+{
+	typedef RBTreeNode<T> Node;
+	typedef __RBReverse_TreeIterator<T, Ref, Ptr> Self;
+
+	Node* _node;
+
+	__RBReverse_TreeIterator(Node* node)
+		:_node(node)
+	{}
+
+	Ref operator*()
+	{
+		return _node->_data;
+	}
+
+	Ptr operator->()
+	{
+		return &_node->_data;
+	}
+
+	bool operator!=(const Self& s)
+	{
+		return _node != s._node;
+	}
+
+	Self& operator--()
+	{
+		if (_node->_right)
+		{
+			// 右不为空，下一个就是右子树的最左节点
+			Node* subLeft = _node->_right;
+			while (subLeft->_left)
+			{
+				subLeft = subLeft->_left;
+			}
+
+			_node = subLeft;
+		}
+		else
+		{
+			// 右子树为空，沿着根的结点，找孩子是父亲左的那个祖先
+			Node* cur = _node;
+			Node* parent = cur->_parent;
+			while (parent && cur == parent->_right)
+			{
+				cur = parent;
+				parent = parent->_parent;
+			}
+
+			_node = parent;
+		}
+		return *this;
+	}
+
+	Self& operator++()
+	{
+		if (_node->_left)
+		{
+			// 左不为空，找左子树的最右节点
+			Node* subRight = _node->_left;
+			while (subRight->_right)
+			{
+				subRight = subRight->_right;
+			}
+
+			_node = subRight;
+		}
+		else
+		{
+			// 左为空，孩子是父亲右的那个祖先
+			Node* parent = _node->_parent;
+			while (parent && _node == parent->_left)
+			{
+				_node = parent;
+				parent = parent->_parent;
+			}
+
+			_node = parent;
+		}
+		return *this;
+	}
+};
+
 		//// 右子树为空，沿着根的结点，找孩子是父亲左的那个祖先
 		//else if (_node == _node->_parent->_right)
 		//{
@@ -73,23 +214,6 @@ struct __RBTreeIterator
 		//{
 		//	_node = _node->_parent;
 		//}
-		else
-		{
-			// 右子树为空，沿着根的结点，找孩子是父亲左的那个祖先
-			Node* parent = _node->_parent;
-			while (parent && _node == parent->_right)
-			{
-				_node = parent;
-				parent = parent->_parent;
-			}
-			if (_node->_right != parent)
-			{
-				_node = parent;
-			}
-		}
-		return *this;
-	}
-};
 
 // 通过仿函数来区分map与set
 template<class K, class T, class KeyofT>
@@ -98,10 +222,11 @@ class RBTree
 	typedef RBTreeNode<T> Node;
 
 public:
-	typedef __RBTreeIterator<T, T&, T*> itertaor;
-	typedef __RBTreeIterator<T, const T&, const T*> const_itertaor;
+	typedef __RBTreeIterator<T, T&, T*> iterator;
+	typedef __RBTreeIterator<T, const T&, const T*> const_iterator;
+	typedef __RBReverse_TreeIterator<T, T&, T*> reverse_iterator;
 
-	itertaor begin()
+	iterator begin() 
 	{
 		Node* cur = _root;
 		while (cur && cur->_left)
@@ -109,12 +234,45 @@ public:
 			cur = cur->_left;
 		}
 
-		return itertaor(cur);
+		return iterator(cur);
 	}
 
-	itertaor end()
+	iterator end() 
 	{
-		return itertaor(nullptr); // end是最后一个节点的下一个数据
+		return iterator(nullptr); // end是最后一个节点的下一个数据
+	}
+
+
+	const_iterator begin() const 
+	{
+		Node* cur = _root;
+		while (cur && cur->_left)
+		{
+			cur = cur->_left;
+		}
+
+		return iterator(cur);
+	}
+
+	const_iterator end() const 
+	{
+		return iterator(nullptr); // end是最后一个节点的下一个数据
+	}
+
+	reverse_iterator rbegin()
+	{
+		Node* cur = _root;
+		while (cur && cur->_right)
+		{
+			cur = cur->_right;
+		}
+
+		return reverse_iterator(cur);
+	}
+
+	reverse_iterator rend()
+	{
+		return reverse_iterator(nullptr); // end是最后一个节点的下一个数据
 	}
 
 public:
@@ -147,17 +305,17 @@ public:
 		return nullptr;
 	}
 
-	bool Insert(const T& data)
+	pair<iterator, bool> Insert(const T& data)
 	{
 		if (_root == nullptr)
 		{
 			_root = new Node(data);
 			_root->_col = BLACK; // 将根节点设置为黑色
-			return true;
+			return make_pair(iterator(_root), true);
 		}
 
 		KeyofT kot;
-		Node* parent = nullptr;
+		Node* parent = nullptr; 
 		Node* cur = _root;
 		while (cur)
 		{
@@ -173,11 +331,12 @@ public:
 			}
 			else
 			{
-				return false;
+				return make_pair(iterator(cur), false);
 			}
 		}
 
 		cur = new Node(data);
+		Node* newnode = cur;
 		if (kot(parent->_data) > kot(data))
 		{
 			parent->_left = cur;
@@ -284,7 +443,7 @@ public:
 
 		_root->_col = BLACK;
 
-		return true;
+		return make_pair(iterator(newnode), true);
 	}
 
 	void InOrder()

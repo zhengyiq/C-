@@ -1,14 +1,14 @@
 #pragma once
 
-enum Colour
-{
+// 结点的颜色
+enum Colour {
 	RED,
 	BLACK,
 };
 
+// 红黑树结点的定义
 template<class K, class V>
-struct RBTreeNode
-{
+struct RBTreeNode {
 	RBTreeNode<K, V>* _left;
 	RBTreeNode<K, V>* _right;
 	RBTreeNode<K, V>* _parent;
@@ -176,7 +176,7 @@ public:
 						grandfather->_col = RED;
 						parent->_col = BLACK;
 					}
-					else
+					else // cur == parent->_left
 					{
 						//    g
 						//  u   p
