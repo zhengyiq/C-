@@ -143,7 +143,7 @@ namespace OpenAddress
 
 	private:
 		vector<HashData<K, V>> _tables;
-		size_t _n; // 存储的数据个数
+		size_t _n = 0; // 存储的数据个数
 		//HashData* _tables; 
 		//size_t size;
 		//size_t capacity;
@@ -182,27 +182,199 @@ namespace OpenAddress
 	}
 
 }
+template<class K>
+struct HashFunc
+{
+	size_t operator()(const K& key)
+	{
+		return key;
+	}
+};
 
+// 模板的特化
+template<>
+struct HashFunc<string>
+{
+	size_t operator()(const string& s)
+	{
+		size_t hash = 0;
+		for (auto ch : s)
+		{
+			hash += ch;
+			hash *= 31;
+		}
+		return hash;
+	}
+};
+// 字符串哈希算法
+// https://www.cnblogs.com/-clq/archive/2012/05/31/2528153.html
+struct HashStr
+{
+	// BKDR
+	size_t operator()(const string& s)
+	{
+		// return s[0];
+
+		size_t hash = 0;
+		for (auto ch : s)
+		{
+			hash += ch; // 这里的问题就是abcd和aadd的问题也会冲突
+			// 解决方案 BKDRHash
+			hash *= 31;
+		}
+		return hash;
+
+	}
+};
 namespace HashBucket
 {
-	template<class K, class V>
+	template<class T>
 	struct HashNode
 	{
-		HashNode<K, V>* _next;
-		pair<K, V> _kv;
+		HashNode<T>* _next;
+		T _data;
 
-		HashNode(const pair<K, V> kv)
+		HashNode(const T& data)
 			:_next(nullptr)
-			,_kv(kv)
+			,_data(data)
 		{}
  	};
 
-	template<class K, class V>
+
+	// 迭代器需要哈希表就需要有一个前置声明，这里存在一个互相引用的问题
+	template<class K, class T, class KeyOfT, class Hash>
+	class HashTable;
+
+	template<class K, class T, class Ref, class Ptr, class KeyOfT, class Hash>
+	struct __HashIterator
+	{
+		typedef HashNode<T> Node;
+
+		typedef HashTable<K, T, KeyOfT, Hash> HT;
+		typedef __HashIterator<K, T, Ref, Ptr, KeyOfT, Hash> Self;
+		typedef __HashIterator<K, T, T&, T*, KeyOfT, Hash> Iterator;
+
+		Node* _node;
+		const HT* _ht;
+
+		__HashIterator(Node* node, const HT* ht)
+			:_node(node)
+			,_ht(ht)
+		{}
+
+		__HashIterator(const Iterator& it)
+			:_node(it._node)
+			, _ht(it._ht)
+		{}
+
+		Ref operator*()
+		{
+			return _node->_data;
+		}
+
+		Ptr operator->()
+		{
+			return &_node->_data;
+		}
+
+		bool operator!=(const Self& s)
+		{
+			return _node != s._node;
+		}
+
+		Self& operator++() // 这里需要访问HashTable中的_tables的内容需要getsize()或者友元
+		{
+			if (_node->_next != nullptr)
+			{
+				_node = _node->_next;
+			}
+			else // _node->_next == nullptr // 找下一个空桶的位置
+			{
+				KeyOfT kot;
+				Hash hash;
+
+				// 算出当前桶的位置
+				size_t hashi = hash(kot(_node->_data)) % _ht->_tables.size();
+				++hashi;
+
+				while (hashi < _ht->_tables.size())
+				{
+					if (_ht->_tables[hashi])
+					{
+						_node = _ht->_tables[hashi];
+						break;
+					}
+					else
+					{
+						++hashi;
+					}
+				}
+
+				// 没有找到不为空的桶
+				if (hashi == _ht->_tables.size())
+				{
+					_node = nullptr;
+				}
+			}
+
+
+			return *this;
+		}
+	};
+
+	template<class K, class T, class KeyOfT, class Hash>
 	class HashTable 
 	{
-		typedef HashNode<K, V> Node;
+		// 需要将迭代器设置为友元
+		template<class K, class T, class Ref, class Ptr, class KeyOfT, class Hash>
+		friend struct __HashIterator;
+
+		typedef HashNode<T> Node;
 
 	public:
+		typedef  __HashIterator<K, T, T&, T*, KeyOfT, Hash> iterator;
+		typedef  __HashIterator<K, T, const T&, const T*, KeyOfT, Hash> const_iterator;
+
+		iterator begin()
+		{
+			Node* cur = nullptr;
+			for (size_t i = 0; i < _tables.size(); ++i)
+			{
+				cur = _tables[i];
+				if (cur)
+				{
+					break;
+				}
+			}
+
+			return iterator(cur, this);
+		}
+
+		iterator end()
+		{
+			return iterator(nullptr, this);
+		}
+
+		const_iterator begin() const
+		{
+			Node* cur = nullptr;
+			for (size_t i = 0; i < _tables.size(); ++i)
+			{
+				cur = _tables[i];
+				if (cur)
+				{
+					break;
+				}
+			}
+
+			return iterator(cur, this);
+		}
+
+		const_iterator end() const 
+		{
+			return iterator(nullptr, this);
+		}
+
 		~HashTable()
 		{
 			for (auto& cur : _tables)
@@ -218,34 +390,59 @@ namespace HashBucket
 			}
 		}
 
-		Node* Find(const K& key)
+		iterator Find(const K& key)
 		{
 			if (_tables.size() == 0)
-				return nullptr;
+				return end();
 
-			size_t hashi = key % _tables.size();
+			KeyOfT kot;
+			Hash hash;
+			size_t hashi = hash(key) % _tables.size();
 			Node* cur = _tables[hashi];
 			while (cur)
 			{
-				if (cur->_kv.first == key)
+				if (kot(cur->_data) == key)
 				{
-					return cur;
+					return iterator(cur, this);
 				}
 
 				cur = cur->_next;
 			}
 
-			return nullptr;
+			return end();
 		}
+
+		//Node* Find(const K& key)
+		//{
+		//	if (_tables.size() == 0)
+		//		return nullptr;
+		//	
+		//	KeyOfT kot;
+		//	Hash hash;
+		//	size_t hashi = hash(key) % _tables.size();
+		//	Node* cur = _tables[hashi];
+		//	while (cur)
+		//	{
+		//		if (kot(cur->_data) == key)
+		//		{
+		//			return cur;
+		//		}
+
+		//		cur = cur->_next;
+		//	}
+
+		//	return nullptr;
+		//}
 
 		bool Erase(const K& key)
 		{
-			size_t hashi = key % _tables.size();
+			Hash hash;
+			size_t hashi = hash(key) % _tables.size();
 			Node* prev = nullptr;
 			Node* cur = _tables[hashi];
 			while (cur)
 			{
-				if (cur->_kv.first == key)
+				if (kot(cur->_data) == key)
 				{
 					if (prev == nullptr)
 					{
@@ -269,40 +466,53 @@ namespace HashBucket
 			return false;
 		}
 
-		bool Insert(const pair<K, V>& kv)
+		size_t GetNextPrime(size_t prime)
 		{
+			// SGI
+			static const int __stl_num_primes = 28;
+			static const unsigned long __stl_prime_list[__stl_num_primes] =
+			{
+				53, 97, 193, 389, 769,
+				1543, 3079, 6151, 12289, 24593,
+				49157, 98317, 196613, 393241, 786433,
+				1572869, 3145739, 6291469, 12582917, 25165843,
+				50331653, 100663319, 201326611, 402653189, 805306457,
+				1610612741, 3221225473, 4294967291
+			};
+
+			size_t i = 0;
+			for (; i < __stl_num_primes; ++i)
+			{
+				if (__stl_prime_list[i] > prime)
+					return __stl_prime_list[i];
+			}
+
+			return __stl_prime_list[i];
+		}
+
+		pair<iterator, bool> Insert(const T& data)
+		{
+			KeyOfT kot;
+			iterator it = Find(kot(data));
+			if (it != end())
+			{
+				return make_pair(it, false);
+			}
+
+			Hash hash;
 			// 扩容
 			// 负载因子==1时扩容平均每个桶下面挂一个
 			if (_n == _tables.size())
 			{
-				//size_t newsize = _tables.size() == 0 ? 10 : _tables.size()*2;
-				//HashTable<K, V> newht;
-				//newht.resize(newsize);
-				//for (auto cur : _tables)
-				//{
-				//	while (cur)
-				//	{
-				//		newht.Insert(cur->_kv);
-				//		cur = cur->_next;
-				//	}
-				//}
-
-				//_tables.swap(newht._tables);
-
-				size_t newsize = _tables.size() == 0 ? 10 : _tables.size() * 2;
+				size_t newsize = GetNextPrime(_tables.size());
 				vector<Node*> newtable(newsize, nullptr);
 
-				//for (Node*& cur : _tables)
-				
-				//for (size_t i = 0; i < _tables.size(); ++i)
-				//{
-				//	Node* cur = _tables[i];
-				for (auto& cur : _tables) 
+				for (auto& cur : _tables)
 				{
 					while (cur)
 					{
 						Node* next = cur->_next; // 记录下一个结点
-						size_t hashi = cur->_kv.first % newtable.size();
+						size_t hashi = hash(kot(cur->_data)) % newtable.size();
 
 						// 插入
 						cur->_next = newtable[hashi]; // 桶的第一个节点是存储在桶中的
@@ -314,48 +524,106 @@ namespace HashBucket
 			}
 
 
-			size_t hashi = kv.first % _tables.size();
-			
+			size_t hashi = hash(kot(data)) % _tables.size();
+
 			// 插入
-			Node* newnode = new Node(kv);
+			Node* newnode = new Node(data);
 			newnode->_next = _tables[hashi];
 			_tables[hashi] = newnode;
 			++_n;
 
-			return true;
+			return make_pair(iterator(newnode, this), true);
+		}
+
+		//bool Insert(const T& data)
+		//{
+		//	KeyOfT kot;
+		//	if (Find(kot(data)))
+		//	{
+		//		return false;
+		//	}
+
+		//	Hash hash;
+		//	// 扩容
+		//	// 负载因子==1时扩容平均每个桶下面挂一个
+		//	if (_n == _tables.size())
+		//	{
+		//		//size_t newsize = _tables.size() == 0 ? 10 : _tables.size()*2;
+		//		//HashTable<K, V> newht;
+		//		//newht.resize(newsize);
+		//		//for (auto cur : _tables)
+		//		//{
+		//		//	while (cur)
+		//		//	{
+		//		//		newht.Insert(cur->_kv);
+		//		//		cur = cur->_next;
+		//		//	}
+		//		//}
+
+		//		//_tables.swap(newht._tables);
+
+		//		
+		//		size_t newsize = GetNextPrime(_tables.size());
+		//		//size_t newsize = _tables.size() == 0 ? 10 : _tables.size() * 2;
+		//		vector<Node*> newtable(newsize, nullptr);
+		//		
+		//		//for (Node*& cur : _tables)
+		//		//for (size_t i = 0; i < _tables.size(); ++i)
+		//		//{
+		//		//	Node* cur = _tables[i];
+		//		for (auto& cur : _tables) 
+		//		{
+		//			while (cur)
+		//			{
+		//				Node* next = cur->_next; // 记录下一个结点
+		//				size_t hashi = hash(kot(cur->_data)) % newtable.size();
+
+		//				// 插入
+		//				cur->_next = newtable[hashi]; // 桶的第一个节点是存储在桶中的
+		//				newtable[hashi] = cur;
+		//				cur = next;
+		//			}
+		//		}
+		//		_tables.swap(newtable);
+		//	}
+
+
+		//	size_t hashi = hash(kot(data)) % _tables.size();
+		//	
+		//	// 插入
+		//	Node* newnode = new Node(data);
+		//	newnode->_next = _tables[hashi];
+		//	_tables[hashi] = newnode;
+		//	++_n;
+
+		//	return true;
+		//}
+
+		size_t MaxBucketSize()
+		{
+			size_t max = 0;
+			for (size_t i = 0; i < _tables.size(); ++i)
+			{
+				auto cur = _tables[i];
+				size_t size = 0;
+				while (cur)
+				{
+					++size;
+					cur = cur->_next;
+				}
+
+				//printf("[%d]->%d\n", i, size);
+				if (size > max)
+				{
+					max = size;
+				}
+			}
+
+			return max;
 		}
 
 	private:
 		vector<Node*> _tables;
 		size_t _n = 0; // 存储的有效数据个数
 	};
-
-	void TestHashTable1()
-	{
-		int a[] = { 3, 33, 2, 13, 5, 12, 1002 };
-		HashTable<int, int> ht;
-		for (auto e : a)
-		{
-			ht.Insert(make_pair(e, e));
-		}
-
-		ht.Insert(make_pair(15, 15));
-		ht.Insert(make_pair(25, 25));
-		ht.Insert(make_pair(35, 35));
-		ht.Insert(make_pair(45, 45));
-	}
-
-	void TestHashTable2()
-	{
-		int a[] = { 3, 33, 2, 13, 5, 12, 1002 };
-		HashTable<int, int> ht;
-		for (auto e : a)
-		{
-			ht.Insert(make_pair(e, e));
-		}
-
-		ht.Erase(12);
-		ht.Erase(3);
-		ht.Erase(33);
-	}
 } 

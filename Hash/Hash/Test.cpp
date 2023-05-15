@@ -128,11 +128,21 @@
 //}
 #include <iostream>
 #include <vector>
+#include <cstdio>
 using namespace std;
 #include "HashTable.h"
+#include "UnorderSet.h"
+#include "UnorderMap.h"
 int main()
 {
 	//OpenAddress::TestHashTable1();
 	//HashBucket::TestHashTable1();
-	HashBucket::TestHashTable2();
+	//HashBucket::TestHashTable2();
+	//HashBucket::TestHashTable3();
+	//HashBucket::TestHashTable4();
+	//zyq::test_unordered_set1();
+	//zyq::test_unordered_map2();
+	zyq::test_unordered_map4();
+	//zyq::TestUnorderMet1();
+	
 }
