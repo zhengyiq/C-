@@ -43,9 +43,9 @@ struct __RBTreeIterator
 		:_node(node)
 	{}
 
-	__RBTreeIterator(const iterator& it)
-		:_node(it._node)
-	{}
+	//__RBTreeIterator(const iterator& it)
+	//	:_node(it._node)
+	//{}
 
 	Ref operator*()
 	{
