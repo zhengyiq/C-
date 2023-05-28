@@ -96,7 +96,8 @@ namespace zyq
 
 		vector(initializer_list<T> il)
 		{
-			//initializer_list<T>::iterator it = il.begin();
+			// 在C++11中我们自己编写的vector有这样的问题：没有实例化的类模板取内嵌类型需要进行typename声明
+			//typename initializer_list<T>::iterator it = il.begin();
 			//while (it != il.end())
 			//{ 
 			//	push_back(*it);
