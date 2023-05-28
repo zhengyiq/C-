@@ -94,6 +94,21 @@ namespace zyq
 			swap(tmp);
 		}
 
+		vector(initializer_list<T> il)
+		{
+			//initializer_list<T>::iterator it = il.begin();
+			//while (it != il.end())
+			//{ 
+			//	push_back(*it);
+			//	++it;
+			//}
+
+			for (auto& e : il)
+			{
+				push_back(e);
+			}
+		}
+
 		~vector()
 		{
 			delete[] _start;
