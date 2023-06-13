@@ -42,13 +42,13 @@ namespace zyq
 			swap(tmp);
 		}
 
-		//// 移动构造
-		//string(string&& s)
-		//	:_str(nullptr)
-		//{
-		//	cout << "string(string&& s) -- 移动拷贝" << endl;
-		//	swap(s);
-		//}
+		// 移动构造
+		string(string&& s)
+			:_str(nullptr)
+		{
+			cout << "string(string&& s) -- 移动拷贝" << endl;
+			swap(s);
+		}
 
 		// 赋值重载
 		string& operator=(const string& s)

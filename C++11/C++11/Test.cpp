@@ -214,16 +214,82 @@ private:
 //}
 
 
-int  main()
-{
-	//右值：纯右值；将亡值
-	//左值引用已经将减少拷贝的场景进行处理，右值引用区分左值与右值，然后将右值(将亡值)的资源进行交换
-	//左值引用：直接减少拷贝。1.左值引用传参 2.传引用返回(函数类的局部对象不能使用引用返回)
+//int  main()
+//{
+//	//右值：纯右值；将亡值
+//	//左值引用已经将减少拷贝的场景进行处理，右值引用区分左值与右值，然后将右值(将亡值)的资源进行交换
+//	//左值引用：直接减少拷贝。1.左值引用传参 2.传引用返回(函数类的局部对象不能使用引用返回)
+//
+//	//zyq::string s1("hello world");
+//	//zyq::string ret1 = s1;
+//	//zyq::string ret2 = (s1 + '!');
+//	
+//	//zyq::string valStr = zyq::to_string(1234);
+//	//
+//	//std::string s1("hello");
+//	//std::string s2 = s1;
+//	//std::string s3 = move(s1);
+//
+//	list<zyq::string> lt;
+//	
+//	lt.push_back(zyq::string("hello world!"));
+//	lt.push_back("hello world!");
+//	
+//	return 0;
+//}
 
-	//zyq::string s1("hello world");
-	//zyq::string ret1 = s1;
-	//zyq::string ret2 = (s1 + '!');
-	
-	zyq::string valStr = zyq::to_string(1234);
+
+//有一点需要注意的就是右值是不能取地址的，但是给右值取别名后，会导致右值被存储到特定位置，且可以取到该位置的地址，也就是说例如：不能取字面量10的地址，但是rr1引用后，可以对rr1取地址，也可以修改rr1。如果不想rr1被修改，可以用const int&& rr1 去引用。
+//int main()
+//{
+//	double x = 1.1, y = 2.2;
+//	int&& rr1 = 10;
+//	const double&& rr2 = x + y;
+//	rr1 = 20;
+//	rr2 = 5.5; // 报错
+//	return 0;
+//}
+
+// 模板中的&&不代表右值引用，而是万能引用，其既能接收左值又能接收右值。
+// 模板的万能引用只是提供了能够接收同时接收左值引用和右值引用的能力，
+// 但是引用类型的唯一作用就是限制了接收的类型，后续使用中都退化成了左值，
+// 我们希望能够在传递过程中保持它的左值或者右值的属性, 就需要用我们下面学习的完美转发
+
+//void Fun(int& x) { cout << "左值引用" << endl; }
+//void Fun(const int& x) { cout << "const 左值引用" << endl; }
+//void Fun(int&& x) { cout << "右值引用" << endl; }
+//void Fun(const int&& x) { cout << "const 右值引用" << endl; }
+//
+//// 万能引用(引用折叠)：既可以引用左值，也可以引用右值
+//template<typename T>
+//void PerfectForward(T&& t)
+//{
+//	Fun(forward<T>(t));
+//}
+//int main()
+//{
+//	PerfectForward(10); // 右值
+//	int a;
+//	PerfectForward(a); // 左值
+//	PerfectForward(move(a)); // 右值
+//
+//	const int b = 8;
+//	PerfectForward(b); // const 左值
+//	PerfectForward(move(b)); // const 右值
+//	return 0;
+//}
+
+#include "List.h"
+
+int main()
+{
+	zyq::list<zyq::string> lt;
+
+	zyq::string s1("hello world");
+	lt.push_back(s1);
+
+	lt.push_back(zyq::string("hello world"));
+	lt.push_back("hello world");
+
 	return 0;
 }
