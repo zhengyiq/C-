@@ -18,7 +18,7 @@ namespace zyq
 			:_size(strlen(str))
 			, _capacity(_size)
 		{
-			//cout << "string(char* str)" << endl;
+			cout << "string(char* str)" << endl;
 
 			_str = new char[_capacity + 1];
 			strcpy(_str, str);
@@ -46,7 +46,7 @@ namespace zyq
 		string(string&& s)
 			:_str(nullptr)
 		{
-			cout << "string(string&& s) -- 移动拷贝" << endl;
+			cout << "string(string&& s) -- 移动构造" << endl;
 			swap(s);
 		}
 
@@ -60,8 +60,18 @@ namespace zyq
 			return *this;
 		}
 
+		// s = 将亡值
+		string& operator=(string&& s)
+		{
+			cout << "string& operator=(string&& s) -- 移动拷贝" << endl;
+			swap(s);
+
+			return *this;
+		}
+
 		~string()
 		{
+			//cout << "~string()" << endl;
 			delete[] _str;
 			_str = nullptr;
 		}

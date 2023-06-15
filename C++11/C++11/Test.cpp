@@ -34,22 +34,22 @@ using namespace std;
 //	int* pa = new int[4]{ 0 };
 //}
 
-class Date
-{
-public:
-	//explicit Date(int year, int month, int day)
-	Date(int year, int month, int day)
-		:_year(year)
-		, _month(month)
-		, _day(day)
-	{
-		cout << "Date(int year, int month, int day)" << endl;
-	}
-private:
-	int _year;
-	int _month;
-	int _day;
-};
+//class Date
+//{
+//public:
+//	//explicit Date(int year, int month, int day)
+//	Date(int year, int month, int day)
+//		:_year(year)
+//		, _month(month)
+//		, _day(day)
+//	{
+//		cout << "Date(int year, int month, int day)" << endl;
+//	}
+//private:
+//	int _year;
+//	int _month;
+//	int _day;
+//};
 //
 //int main()
 //{
@@ -280,16 +280,293 @@ private:
 //}
 
 #include "List.h"
+//
+//int main()
+//{
+//	zyq::list<zyq::string> lt;
+//
+//	zyq::string s1("hello world");
+//	lt.push_back(s1);
+//
+//	lt.push_back(zyq::string("hello world"));
+//	lt.push_back("hello world");
+//
+//	return 0;
+//}
 
+///////////////////////////////////////////////////////////////////////////////////////
+
+// 左值引用没有解决的问题
+// 1.局部对象的返回问题
+// 2.插入接口，对象拷贝的问题
+// T是自定义类型:
+// 1.浅拷贝的类，这里就是拷贝构造，因为对于浅拷贝的类，移动构造是没有什么意义的。
+// 2.深拷贝的类，这里就是移动构造，对于深拷贝的类，移动构造可以转移右值的资源，没有拷贝，提高效率。
+
+//int main()
+//{
+//	zyq::string s1;
+//
+//	s1 = zyq::to_string(1234);
+//	// string(string && s) --移动拷贝 -> 
+//	// string& operator=(string s) --深拷贝
+//	// string(const string & s) --深拷贝 -> 这里使用的是现代写法复用了拷贝构造的实现
+//
+//	// 添加了移动拷贝之后的结果
+//	// string(string && s) --移动构造
+//	// string& operator=(string && s) --移动拷贝
+//
+//	//zyq::string("hello"); // 调用的是->string(char* str)构造
+//
+//	//void push_back(const string & s) // 解决了传递临时变量时的生命周期的问题。
+//	//{}
+//
+//	//v.push_back(string("111111"));
+//	//v.push_back("111111");
+//	// 但是不能够无限的延长生命周期因为变量出了作用域就会调用析构函数进行销毁
+//
+//	//const string& ref = to_string(1234);
+//	//使用const&来进行接收就可以得到生命周期延长的临时变量，传值返回的临时变量生成在上一层栈帧中
+//}
+
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+
+//类的新成员
+//之前一共有六个默认成员函数
+//1.构造函数
+//2.析构函数
+//3.拷贝构造函数
+//4.拷贝赋值重载
+//5.取地址重载
+//6.const取地址重载
+//7.移动构造移动赋值生成条件苛刻
+//如果你没有自己实现移动构造函数，且没有实现析构函数 、拷贝构造、拷贝赋值重载中的任意一个。(条件更多了，深拷贝的类，资源转移期望我们自己实现)那么编译器会自动生成一个默认移动构造。默认生成的移动构造函数，对于内置类型成员会执行逐成员按字节拷贝，自定义类型成员，则需要看这个成员是否实现移动构造，如果实现了就调用移动构造，没有实现就调用拷贝构造。
+
+
+//class Person
+//{
+//public:
+//	Person(const char* name = "", int age = 0)
+//		:_name(name)
+//		, _age(age)
+//	{
+//		cout << "Person(const char* name = "", int age = 0)" << endl;
+//	}
+//
+//	//Person(const Person& p) = delete;
+//
+//	//Person(const Person& p)
+//	//	:_name(p._name)
+//	//	,_age(p._age)
+//	//	{}
+//
+//	//Person& operator=(const Person& p)
+//	//{
+//	//	if (this != &p)
+//	//	{
+//	//		_name = p._name;
+//	//		_age = p._age;
+//	//	}
+//	//	return *this;
+//	//}
+//
+//	//Person(Person&& p) = default;
+//	//Person& operator=(Person&& p) = default;
+//
+//	//~Person()
+//	//{
+//	//	cout << "~Person()" << endl;
+//	//}
+//private:
+//	zyq::string _name;
+//	int _age;
+//};
+//int main()
+//{
+//	Person s1;
+//	//Person s2 = s1;
+//	//Person s3 = std::move(s1);
+//	//Person s4;
+//	//s4 = std::move(s2);
+//	return 0;
+//}
+
+//class Person
+//{
+//public:
+//	Person(const char* name, int age)
+//		:_name(name)
+//		, _age(age)
+//	{
+//		cout << "Person(const char* name = "", int age = 0)" << endl;
+//	}
+//
+//	// 委托构造，一个构造函数可以复用其他构造函数
+//	Person(const Person& p)
+//		:Person(name, 18)
+//	{}
+//
+//private:
+//	zyq::string _name;
+//	int _age;
+//};
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+//可变参数模板
+// Args是一个模板参数包，args是一个函数形参参数包
+// 声明一个参数包Args...args，这个参数包中可以包含0到任意个模板参数。
+//template <class ...Args>
+//void ShowList(Args... args)
+//{	
+//	cout << sizeof...(args) << endl;
+//	// 如何解析函数参数包
+//	// err
+//	//for (int i = 0; i < sizeof...(args); ++i)
+//	//{
+//	//	cout << args[i] << endl;
+//	//}
+//	//cout << endl;
+//
+//
+//}
+
+//void ShowList()
+//{
+//	cout << endl;
+//}
+//// 递归思维推导
+//template <class T, class ...Args>
+//void ShowList(const T& val, Args... args)
+//{
+//	cout << __FUNCTION__ << "(" << sizeof...(args) << ")" << endl;
+//	cout << val << " ";
+//	ShowList(args...);
+//}
+//
+//int main()
+//{
+//	//ShowList(1);
+//	//ShowList(1, 'A');
+//	ShowList(1, 'A', std::string("sort"));
+//}
+
+//void _ShowList()
+//{
+//	cout << endl;
+//}
+// 递归思维推导
+//template <class T, class ...Args>
+//void _ShowList(const T& val, Args... args)
+//{
+//	cout << __FUNCTION__ << "(" << sizeof...(args) << ")" << endl;
+//	cout << val << " ";
+//	_ShowList(args...);
+//}
+//
+//template <class ...Args>
+//void ShowList(Args... args)
+//{
+//	_ShowList(args...);
+//}
+//
+//int main()
+//{
+//	//ShowList(1);
+//	//ShowList(1, 'A');
+//	ShowList(1, 'A', std::string("sort"));
+//}
+
+//template <class T>
+//void PrintArg(T t)
+//{
+//	cout << t << " ";
+//}
+////展开函数
+//template <class ...Args>
+//void ShowList(Args... args)
+//{
+//	int arr[] = { (PrintArg(args), 0)... };
+//	cout << endl;
+//}
+//int main()
+//{
+//	ShowList(1);
+//	ShowList(1, 'A');
+//	ShowList(1, 'A', std::string("sort"));
+//	return 0;
+//}
+//template <class T>
+//int PrintArg(T t)
+//{
+//	cout << t << " ";
+//
+//	return 0;
+//}
+////展开函数
+//template <class ...Args>
+//void ShowList(Args... args)
+//{
+//	int arr[] = { PrintArg(args)... };
+//	cout << endl;
+//}
+//// 编译器编译推演生成的代码
+////void ShowList(int a1, char a2, std::string a3)
+////{
+////	int arr[] = { PrintArg(a1), PrintArg(a2), PrintArg(a3) };
+////	cout << endl;
+////}
+//int main()
+//{
+//	ShowList(1, 'A', std::string("sort"));
+//	return 0;
+//}
+
+///////////////////////////////////////////////////////////
+//STL容器的插入接口都有一个emplace系列
+#include "Date.h"
 int main()
 {
-	zyq::list<zyq::string> lt;
+	// 深拷贝的类
+	std::list<zyq::string> mylist;
+	// 没区别
+	/*zyq::string s1("1111");
+	mylist.push_back(s1);
+	mylist.emplace_back(s1);
 
-	zyq::string s1("hello world");
-	lt.push_back(s1);
+	cout << endl;
+	zyq::string s2("2222");
+	mylist.push_back(move(s1));
+	mylist.emplace_back(move(s2));*/
 
-	lt.push_back(zyq::string("hello world"));
-	lt.push_back("hello world");
+	// 开始有区别
+	//cout << endl;
+	//mylist.push_back("3333");   // 构造匿名对象 + 移动构造
+	//mylist.emplace_back("3333");// 直接构造
+
+	// 浅拷贝的类
+	// 没区别
+	std::list<Date> list2;
+	Date d1(2023, 5, 28);
+	list2.push_back(d1);
+	list2.emplace_back(d1);
+
+	cout << endl;
+	Date d2(2023, 5, 28);
+	list2.push_back(move(d1));
+	list2.emplace_back(move(d2));
+
+	// 有区别
+	cout << "=========================" << endl;
+	list2.push_back(Date(2023, 5, 28));
+	list2.push_back({ 2023, 5, 28 });
+
+	cout << endl;
+	list2.emplace_back(Date(2023, 5, 28)); // 构造+移动构造
+	list2.emplace_back(2023, 5, 28);       // 直接构造
+
 
 	return 0;
 }
