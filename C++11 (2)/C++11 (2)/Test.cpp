@@ -234,46 +234,463 @@ using namespace std;
 //
 
 
+//int main()
+//{
+//	size_t m;
+//	cin >> m;
+//	vector<thread> vthds(m);
+//	//要求m个线程分别打印n
+//
+//	for (size_t i = 0; i < m; i++)
+//	{
+//		size_t n = 10;
+//
+//		vthds[i] = thread([n]() // 右值的匿名对象进行移动赋值
+//			{
+//				for (int j = 0; j < n; ++j)
+//				{
+//					cout << this_thread::get_id() << ":" << j << endl;
+//					//this_thread::sleep_for(chrono::seconds(1));
+//				}
+//				cout << endl;
+//
+//			});
+//		//cout << vthds[i].get_id() << endl;
+//	}
+//
+//	//for (auto t : vthds) // 不支持拷贝构造 报错
+//	for (auto& t : vthds)
+//	{
+//		t.join();
+//	}
+//	return 0;
+//
+//	// yield// 无锁编程 CAS
+//	//int i = 0;
+//	//i += 1;
+//
+//	// 原子
+//	/*int old = i;
+//	while (!__sync_bool_compare_and_swap(&i, old, old+1))
+//	{
+//		old = i;
+//	}*/
+//}
+//
+
+#include <mutex>
+#include <list>
+///////////////////////////////////////////////////////////////////////////////////////////
+//list<int> lt;
+//mutex mtx;
+//int x = 0;
+
+//void Func(int n) // 每个线程有自己独立的栈
+//{
+//	//cout << &n << endl;
+//	//cout << &x << endl;
+//	//for (int i = 0; i < n; i++) // 有大量的切换上下文的操作
+//	//{
+//	//	mtx.lock();
+//	//	++x; // 消耗太小
+//	//	mtx.unlock();
+//		//cout << i << endl;
+//		//cout << i << endl;
+//		//cout << i << endl;
+//	//}
+//
+//	mtx.lock();
+//	for (int i = 0; i < n; i++)
+//	{
+//		++x;
+//	}
+//	mtx.unlock();
+//}
+
+//int main()
+//{
+//	int n = 10000000;
+//	size_t begin = clock();
+//	thread t1(Func, n);
+//	thread t2(Func, n);
+//
+//	t1.join();
+//	t2.join();
+//	size_t end = clock();
+//
+//	cout << x << endl;
+//	cout << end - begin << endl;
+//
+//
+//	return 0;
+//}
+
+
+//int main()
+//{
+//	mutex mtx;
+//	int n = 10000000;
+//	size_t begin = clock();
+//	thread t1([&, n]()
+//		{
+//			mtx.lock();
+//			for (int i = 0; i < n; ++i)
+//			{
+//				++x;
+//			}
+//			mtx.unlock();
+//
+//		});
+//	thread t2([&, n]()
+//		{
+//			mtx.lock();
+//			for (int i = 0; i < n; ++i)
+//			{
+//				++x;
+//			}
+//			mtx.unlock();
+//
+//		});
+//
+//	t1.join();
+//	t2.join();
+//	size_t end = clock();
+//
+//	cout << x << endl;
+//	cout << end - begin << endl;
+//
+//
+//	return 0;
+//}
+
+//recursive_mutex mtx;
+////mutex mtx;
+//void Func(int n) // 栈的空间会爆
+//{
+//	if (n == 0)
+//		return;
+//	mtx.lock();
+//	++x;
+//
+//	Func(n - 1);
+//	mtx.unlock(); // 正常的互斥锁死锁
+//}
+//
+//int main()
+//{
+//	int n = 10000;
+//	thread t1(Func, n);
+//	thread t2(Func, n);
+//
+//	t1.join();
+//	t2.join();
+//
+//	cout << x << endl;
+//
+//
+//	return 0;
+//}
+
+//template<class Lock>
+//class LockGard
+//{
+//public:
+//	LockGard(Lock& lk) // 锁没有移动构造
+//		:_lk(lk)
+//	{
+//		_lk.lock();
+//	}
+//	~LockGard()
+//	{
+//		_lk.unlock();
+//	}
+//private:
+//	Lock& _lk;
+//};
+//int x = 0;
+//mutex mtx;
+//void Func(int n)
+//{
+//	for (int i = 0; i < n; ++i)
+//	{
+//		try
+//		{
+//			//mtx.lock();
+//			//LockGard<mutex> lock(mtx);
+//			//lock_guard<mutex> lock(mtx);
+//			unique_lock<mutex> lock(mtx);
+//			
+//			++x;
+//			
+//			lock.unlock();
+//			//...
+//			lock.lock();
+//
+//			// 抛异常... 
+//			if (rand() % 5 == 0)
+//			{
+//				throw exception("抛异常"); 
+//			}
+//			//mtx.unlock(); 
+//		}
+//		catch (const std::exception& e)
+//		{
+//			cout << e.what() << endl; // 抛异常时，不会解锁，当再次进入时就会导致死锁问题
+//		}
+//	}
+//}
+//
+//int main()
+//{
+//	int n = 10;
+//	thread t1(Func, n);
+//	thread t2(Func, n);
+//
+//	t1.join();
+//	t2.join();
+//
+//	cout << x << endl;
+//
+//
+//	return 0;
+//}
+
+
+//原子操作
+//int main()
+//{
+//	//底层CAS
+//	int n = 100000;
+//	atomic<int> x = 0;
+//	//atomic<int> x = {0};
+//	//atomic<int> x{0};
+//	//int x = 0;
+//
+//	mutex mtx;
+//	size_t begin = clock();
+//
+//	thread t1([&, n](){
+//			for (int i = 0; i < n; i++)
+//			{
+//				++x;
+//			}
+//		});
+//
+//	thread t2([&, n]() {
+//			for (int i = 0; i < n; i++)
+//			{
+//				++x;
+//			}
+//		});
+//
+//	t1.join();
+//	t2.join();
+//	size_t end = clock();
+//
+//	cout << x << endl;
+//	cout << end - begin << endl;
+//	
+//	//Func(x);
+//	//printf("%d\n", x.load()); // 直接使用会报错
+//
+//	return 0;
+//}
+
+// 支持两个线程交替打印，t1打印奇数，t2一个打印偶数
+#include <condition_variable>
 int main()
 {
-	size_t m;
-	cin >> m;
-	vector<thread> vthds(m);
-	//要求m个线程分别打印n
+	mutex mtx;
+	int n = 100;
+	int x = 1;
+	condition_variable cv;
+	// 问题1：如何保证t1先运行，t2阻塞？
+	// 问题2：如何防止一个线程不断运行？
+	thread t1([&, n]() {
+		//while(x < n)
+		while(1)
+		{ 
+			unique_lock<mutex> lock(mtx);
+			if (x >= 100) break; // 排除t2加到100之后，t1已经进入循环判断会导致101的风险
+			//if (x % 2 == 0) // 偶数阻塞，奇数不阻塞；防止一个线程不断地运行
+			//{
+			//	cv.wait(lock);
+			//}
+			cv.wait(lock, [&x]() {return x % 2 != 0; });
+			//mtx.lock();
+			cout << this_thread::get_id() << ":" << x << endl;
+			++x;
+			//mtx.unlock();
+			cv.notify_one();
+		}
+		});
 
-	for (size_t i = 0; i < m; i++)
-	{
-		size_t n = 10;
+	thread t2([&, n]() {
+		//while (x < n)
+		while (1)
+		{
+			unique_lock<mutex> lock(mtx);
+			if (x > 100) break;
+			//if (x % 2 == 1) // 奇数阻塞
+			//{
+			//	cv.wait(lock); // 保证t1先运行，t2阻塞？
+			//}
+			cv.wait(lock, [&x]() {return x % 2 == 0; });
+			//mtx.lock();
+			cout << this_thread::get_id() << ":" << x << endl;
+			++x;
+			//mtx.unlock();
+			cv.notify_one();
+		}
+		});
 
-		vthds[i] = thread([n]() // 右值的匿名对象进行移动赋值
-			{
-				for (int j = 0; j < n; ++j)
-				{
-					cout << this_thread::get_id() << ":" << j << endl;
-					//this_thread::sleep_for(chrono::seconds(1));
-				}
-				cout << endl;
+	t1.join();
+	t2.join();
 
-			});
-		//cout << vthds[i].get_id() << endl;
-	}
-
-	//for (auto t : vthds) // 不支持拷贝构造 报错
-	for (auto& t : vthds)
-	{
-		t.join();
-	}
 	return 0;
-
-	// yield// 无锁编程 CAS
-	//int i = 0;
-	//i += 1;
-
-	// 原子
-	/*int old = i;
-	while (!__sync_bool_compare_and_swap(&i, old, old+1))
-	{
-		old = i;
-	}*/
 }
+// t1先抢到锁，t2后抢到锁，t1先运行，t2阻塞在锁上
+// t2先抢到锁，t1后抢到锁，t2先运行，t1阻塞在锁上，但是t2下一步会被wait阻塞。并且wait时会解锁，保证了t1先运行。
 
+//thread t1([&, n]() {
+//	while (1)
+//	{
+//		unique_lock<mutex> lock(mtx);
+//
+//		cout << this_thread::get_id() << ":" << x << endl;
+//
+//	}
+//	});
+//
+//thread t2([&, n]() {
+//	//while (x < n)
+//	while (1)
+//	{
+//		unique_lock<mutex> lock(mtx);
+//		cv.wait(lock);
+//		cout << this_thread::get_id() << ":" << x << endl;
+//	}
+
+
+
+///////////////////////////////////////////////////////////////////////////////////////////
+//#include <functional>
+//#include <map>
+//// 包装器function - 类模板
+//// 对可调用对象类型进行再封装适配
+//// 函数指针
+//// 仿函数
+//// lambda(仿函数)
+//
+//int f(int a, int b)
+//{
+//	cout << "int f(int a, int b)" << endl;
+//	return a + b;
+//}
+//
+//struct Functor
+//{
+//public:
+//	int operator() (int a, int b)
+//	{
+//		cout << "int operator() (int a, int b)" << endl;
+//
+//		return a + b;
+//	}
+//};
+//
+//class Plus
+//{
+//public:
+//
+//	Plus(int rate = 2)
+//		:_rate(rate)
+//	{}
+//	static int plusi(int a, int b)
+//	{
+//		return a + b;
+//	}
+//	double plusd(double a, double b)
+//	{
+//		return a + b * _rate;
+//	}
+//private:
+//	int _rate = 2;
+//};
+//
+//int main()
+//{
+//	//int(*pf1)(int, int) = f;
+//
+//	//map<string, > //没有办法声明函数指针与类对象
+//
+//
+//	// 包装出统一的类型
+//	//function<int(int, int)> f1 = f;
+//	//function<int(int, int)> f2 = Functor();
+//	//function<int(int, int)> f3 = [](int x, int y) {
+//	//	return x + y;
+//	//};
+//
+//	//cout << f1(1, 2) << endl;
+//	//cout << f2(10, 20) << endl;
+//	//cout << f3(1, 3) << endl;
+//
+//	//map<string, function<int(int, int)>> opFuncMap;
+//	//opFuncMap["函数指针"] = f;
+//	//opFuncMap["仿函数"] = Functor();
+//	//opFuncMap["lambda"] = [](int a, int b) {
+//	//	cout << "[](int a, int b) {return a + b;}" << endl;
+//	//	return a + b;
+//	//};
+//
+//	//cout << opFuncMap["lambda"](1, 2) << endl;
+//
+//	 
+//	//function<int(int, int)> f1 = Plus::plusi;//普通函数与静态成员函数函数名就是指针， 非静态需要添加&
+//	function<int(int, int)> f1 = &Plus::plusi; 
+//	function<double(Plus, double, double)> f2 = &Plus::plusd; // 这里添加的是Plus， 使用对去调用
+//	function<double(Plus*, double, double)> f3 = &Plus::plusd; // 这里添加的是Plus*
+//	
+//	cout << f1(1, 2) << endl;
+//	cout << f2(Plus(), 20, 20) << endl;
+//	cout << f2(Plus(3), 30, 20) << endl;
+//
+//	Plus pl1(3);
+//	cout << f2(pl1, 20, 20) << endl;
+//
+//	Plus pl2(3);
+//	cout << f3(&pl2, 20, 20) << endl; // 指针不能使用匿名对象，因为不能取地址
+//
+//	return 0;
+//}
+// 使类型能够更好的表达
+//class Solution {
+//public:
+//	int evalRPN(vector<string>& tokens) {
+//		stack<int> s;
+//		map<string, function<int(int, int)>> oFuncMap =
+//		{
+//			{"+", [](int x, int y) {return x + y; }},
+//			{"-", [](int x, int y) {return x - y; }},
+//			{"*", [](int x, int y) {return x * y; }},
+//			{"/", [](int x, int y) {return x / y; }}
+//		};
+//		for (auto str : tokens)
+//		{
+//			if (oFuncMap.count(str))
+//			{
+//				int right = s.top();
+//				s.pop();
+//				int left = s.top();
+//				s.pop();
+//				s.push(oFuncMap[str](left, right));
+//			}
+//			else
+//			{
+//				s.push(stoi(str));
+//			}
+//		}
+//		return s.top();
+//	}
+//};
