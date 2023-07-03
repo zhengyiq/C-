@@ -1,6 +1,9 @@
 #include <iostream>
 #include <vector>
 #include <thread>
+#include <stack>
+#include <map>
+#include <string>
 #include <algorithm>
 using namespace std;
 
@@ -67,8 +70,10 @@ using namespace std;
 //
 //	return 0;
 //}
+
 //int main()
 //{
+//	int n = 0;
 //	int x = 0; int y = 1;
 //	auto swap1 = [](int& rx, int& ry)
 //	{
@@ -81,23 +86,25 @@ using namespace std;
 //	cout << "x:" << x << " y:" << y << endl;
 //
 //	auto func1 = [&x, y]() // 混合捕捉
-//	{}
+//	{; };
 //	auto func2 = [&]() // 全部引用捕捉
-//	{}
+//	{; };
 //	auto func3 = [=]() // 全部传值捕捉
-//	{}
+//	{; };
 //	auto func4 = [&, x]() // 全部传值捕捉, x传值捕捉
-//	{}
-//
-//	//auto swap2 = [x, y]() mutable //使传值捕捉可以进行捕获
-//	auto swap2 = [&x, &y]() // 捕捉列表可以捕捉外面作用域的变量 // 引用捕捉
+//	{; };
+//	while (1)
 //	{
-//		int tmp = x;
-//		x = y;
-//		y = tmp;
-//	};
-//
-//	swap2();
+//		int m = 0;
+//		//auto swap2 = [x, y]()  //使传值捕捉可以进行捕获
+//		auto swap2 = [&x, &y, m, n]() // 捕捉列表可以捕捉外面作用域的变量 // 引用捕捉
+//		{
+//			int tmp = x;
+//			x = y;
+//			y = tmp;
+//		};
+//	}
+//	//swap2();
 //	cout << "x:" << x << " y:" << y << endl;
 //}
 
@@ -497,58 +504,58 @@ using namespace std;
 //}
 
 // 支持两个线程交替打印，t1打印奇数，t2一个打印偶数
-#include <condition_variable>
-int main()
-{
-	mutex mtx;
-	int n = 100;
-	int x = 1;
-	condition_variable cv;
-	// 问题1：如何保证t1先运行，t2阻塞？
-	// 问题2：如何防止一个线程不断运行？
-	thread t1([&, n]() {
-		//while(x < n)
-		while(1)
-		{ 
-			unique_lock<mutex> lock(mtx);
-			if (x >= 100) break; // 排除t2加到100之后，t1已经进入循环判断会导致101的风险
-			//if (x % 2 == 0) // 偶数阻塞，奇数不阻塞；防止一个线程不断地运行
-			//{
-			//	cv.wait(lock);
-			//}
-			cv.wait(lock, [&x]() {return x % 2 != 0; });
-			//mtx.lock();
-			cout << this_thread::get_id() << ":" << x << endl;
-			++x;
-			//mtx.unlock();
-			cv.notify_one();
-		}
-		});
-
-	thread t2([&, n]() {
-		//while (x < n)
-		while (1)
-		{
-			unique_lock<mutex> lock(mtx);
-			if (x > 100) break;
-			//if (x % 2 == 1) // 奇数阻塞
-			//{
-			//	cv.wait(lock); // 保证t1先运行，t2阻塞？
-			//}
-			cv.wait(lock, [&x]() {return x % 2 == 0; });
-			//mtx.lock();
-			cout << this_thread::get_id() << ":" << x << endl;
-			++x;
-			//mtx.unlock();
-			cv.notify_one();
-		}
-		});
-
-	t1.join();
-	t2.join();
-
-	return 0;
-}
+//#include <condition_variable>
+//int main()
+//{
+//	mutex mtx;
+//	int n = 100;
+//	int x = 1;
+//	condition_variable cv;
+//	// 问题1：如何保证t1先运行，t2阻塞？
+//	// 问题2：如何防止一个线程不断运行？
+//	thread t1([&, n]() {
+//		//while(x < n)
+//		while(1)
+//		{ 
+//			unique_lock<mutex> lock(mtx);
+//			if (x >= 100) break; // 排除t2加到100之后，t1已经进入循环判断会导致101的风险
+//			//if (x % 2 == 0) // 偶数阻塞，奇数不阻塞；防止一个线程不断地运行
+//			//{
+//			//	cv.wait(lock);
+//			//}
+//			cv.wait(lock, [&x]() {return x % 2 != 0; });
+//			//mtx.lock();
+//			cout << this_thread::get_id() << ":" << x << endl;
+//			++x;
+//			//mtx.unlock();
+//			cv.notify_one();
+//		}
+//		});
+//
+//	thread t2([&, n]() {
+//		//while (x < n)
+//		while (1)
+//		{
+//			unique_lock<mutex> lock(mtx);
+//			if (x > 100) break;
+//			//if (x % 2 == 1) // 奇数阻塞
+//			//{
+//			//	cv.wait(lock); // 保证t1先运行，t2阻塞？
+//			//}
+//			cv.wait(lock, [&x]() {return x % 2 == 0; });
+//			//mtx.lock();
+//			cout << this_thread::get_id() << ":" << x << endl;
+//			++x;
+//			//mtx.unlock();
+//			cv.notify_one();
+//		}
+//		});
+//
+//	t1.join();
+//	t2.join();
+//
+//	return 0;
+//}
 // t1先抢到锁，t2后抢到锁，t1先运行，t2阻塞在锁上
 // t2先抢到锁，t1后抢到锁，t2先运行，t1阻塞在锁上，但是t2下一步会被wait阻塞。并且wait时会解锁，保证了t1先运行。
 
@@ -574,7 +581,7 @@ int main()
 
 
 ///////////////////////////////////////////////////////////////////////////////////////////
-//#include <functional>
+#include <functional>
 //#include <map>
 //// 包装器function - 类模板
 //// 对可调用对象类型进行再封装适配
@@ -694,3 +701,137 @@ int main()
 //		return s.top();
 //	}
 //};
+
+
+//int sub(int a, int b)
+//{
+//	return a - b;
+//}
+//
+//class Sub {
+//public:
+//	Sub(int rate = 3)
+//		:_rate(rate)
+//	{}
+//
+//	int operator()(int a, int b)
+//	{
+//		return (a - b) * _rate;
+//	}
+//private:
+//	int _rate;
+//};
+//
+//class Solution {
+//public:
+//	int evalRPN(vector<string>& tokens) {
+//		stack<int> st;
+//		map<string, function<int(int, int)>> opFuncMap =
+//		{
+//			{ "+", [](int i, int j) {return i + j; } },
+//			{ "-", sub },
+//			{ "*", [](int i, int j) {return i * j; } },
+//			{ "/", [](int i, int j) {return i / j; } },
+//			{ "#", Sub() }
+//		};
+//		for (auto& str : tokens)
+//		{
+//			if (opFuncMap.find(str) != opFuncMap.end())
+//			{
+//				int right = st.top();
+//				st.pop();
+//				int left = st.top();
+//				st.pop();
+//				st.push(opFuncMap[str](left, right));
+//			}
+//			else
+//			{
+//				// 1、atoi itoa
+//				// 2、sprintf scanf
+//				// 3、stoi to_string C++11
+//				st.push(stoi(str));
+//			} 
+//		}
+//		return st.top();
+//	}
+//};
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+// bind 函数模板，用于调整参数的顺序与个数
+
+// 调整参数的顺序
+//void Print(int a, int b)
+//{
+//	cout << a << " " << b << endl;
+//	cout << "void Print(int a, int b)" << endl;
+//}
+//
+//
+//int main()
+//{
+//	Print(1, 2);
+//	function<void(int, int)> RPrint = bind(Print, placeholders::_2, placeholders::_1);
+//	//auto RPrint = bind(Print, placeholders::_2, placeholders::_1);
+//	RPrint(10, 20);
+//}
+
+// 调整参数个数
+using namespace placeholders;
+class Sub {
+public:
+	Sub(int rate)
+		:_rate(rate)
+	{}
+	int func(int a, int b) // 在内核中有三个参数 this指针
+	{
+		return (a - b) * _rate;
+	} 
+private:
+	int _rate;
+};
+
+class Solution {
+public:
+	int evalRPN(vector<string>& tokens) {
+		stack<int> st;
+		map<string, function<int(int, int)>> opFuncMap =
+		{
+			{ "+", [](int i, int j) {return i + j; } },
+			//{ "-", Sub::func },
+			{ "-", bind(&Sub::func, Sub(3), placeholders::_1, placeholders::_2) },
+			{ "*", [](int i, int j) {return i * j; } },
+			{ "/", [](int i, int j) {return i / j; } }
+		};
+		for (auto& str : tokens)
+		{
+			if (opFuncMap.find(str) != opFuncMap.end())
+			{
+				int right = st.top();
+				st.pop();
+				int left = st.top();
+				st.pop();
+				st.push(opFuncMap[str](left, right));
+			}
+			else
+			{
+				// 1、atoi itoa
+				// 2、sprintf scanf
+				// 3、stoi to_string C++11
+				st.push(stoi(str));
+			}
+		}
+		return st.top();
+	}
+};
+
+int main()
+{
+
+	function<int(Sub, int, int)> fSub = &Sub::func;
+
+	// 绑定可以将某个参数绑死
+	function<int(int, int)> func = bind(&Sub::func, Sub(3), _1, _2);
+	function<int(Sub, int)> func1 = bind(&Sub::func, _1, 10, _2);
+
+	return 0;
+}
