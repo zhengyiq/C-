@@ -549,19 +549,19 @@ int main()
 	// 浅拷贝的类
 	// 没区别
 	std::list<Date> list2;
-	Date d1(2023, 5, 28);
-	list2.push_back(d1);
-	list2.emplace_back(d1);
+	//Date d1(2023, 5, 28);
+	//list2.push_back(d1);
+	//list2.emplace_back(d1);
 
-	cout << endl;
-	Date d2(2023, 5, 28);
-	list2.push_back(move(d1));
-	list2.emplace_back(move(d2));
+	//cout << endl;
+	//Date d2(2023, 5, 28);
+	//list2.push_back(move(d1));
+	//list2.emplace_back(move(d2));
 
 	// 有区别
-	cout << "=========================" << endl;
-	list2.push_back(Date(2023, 5, 28));
-	list2.push_back({ 2023, 5, 28 });
+	//cout << "=========================" << endl;
+	//list2.push_back(Date(2023, 5, 28));
+	//list2.push_back({ 2023, 5, 28 });
 
 	cout << endl;
 	list2.emplace_back(Date(2023, 5, 28)); // 构造+移动构造
