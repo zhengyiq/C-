@@ -7,9 +7,9 @@ using namespace std;
 #include "bitset.h"
 int main()
 {
-	//Test_bitset2();
+	Test_bitset1();
 	//test_twobitset();
-	test_bloomfilter2();
+	//test_bloomfilter2();
 
 	return 0;
 }
