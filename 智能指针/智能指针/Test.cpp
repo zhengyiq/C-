@@ -1,7 +1,9 @@
+#define _CRT_SECURE_NO_WARNINGS 1
 #include <iostream>
 #include <string>
 #include <memory>
 #include <mutex>
+#include <functional>
 #include <thread>
 using namespace std;
 

@@ -108,13 +108,21 @@ namespace zyq
 			:_ptr(ptr)
 			, _pcount(new int(1))
 			, _pmtx(new mutex)
-			
 		{}
 
-			~shared_ptr()
+		template<class D>
+		shared_ptr(T* ptr, D del)
+			:_ptr(ptr)
+			, _pcount(new int(1))
+			, _pmtx(new mutex)
+			, _del(del)
+		{}
+
+		~shared_ptr()
 		{
 			Release();
 		}
+
 		void Release()
 		{
 			_pmtx->lock();
@@ -125,11 +133,13 @@ namespace zyq
 			{
 				if (_ptr)
 				{
-					cout << "delete:" << _ptr << endl;
-					delete _ptr;
-					delete _pcount;
-					deleteFlag = true;
+					//cout << "delete:" << _ptr << endl;
+					//delete _ptr;
+
+					_del(_ptr);
 				}
+				delete _pcount;
+				deleteFlag = true;
 			}
 
 			_pmtx->unlock();
@@ -369,17 +379,33 @@ namespace zyq
 		}
 	};
 
+	//void test_shared_deletor()
+	//{
+	//	std::shared_ptr<Date> spa1(new Date[10], DeleteArray<Date>());
+	//	std::shared_ptr<Date> spa2(new Date[10], [](Date* ptr) {
+	//		cout << "lambda delete[]" << ptr << endl;
+	//		delete[] ptr;
+	//		});
+
+	//	std::shared_ptr<FILE> spF3(fopen("Test.cpp", "r"), [](FILE* ptr) {
+	//		cout << "lambda fclose" << ptr << endl;
+	//		fclose(ptr);
+	//		});
+	//}
+
 	void test_shared_deletor()
 	{
-		std::shared_ptr<Date> spa1(new Date[10], DeleteArray<Date>());
-		std::shared_ptr<Date> spa2(new Date[10], [](Date* ptr) {
-			cout << "lambda delete[]" << ptr << endl;
+		zyq::shared_ptr<Date> sp0(new Date);
+
+		zyq::shared_ptr<Date> spa1(new Date[10], DeleteArray<Date>());
+		zyq::shared_ptr<Date> spa2(new Date[10], [](Date* ptr) {
+			cout << "lambda delete[]:" << ptr << endl;
 			delete[] ptr;
 			});
 
-		//std::shared_ptr<FILE> spF3(fopen("Test.cpp", "r"), [](FILE* ptr) {
-		//	cout << "lambda fclose" << ptr << endl;
-		//	fclose(ptr);
-		//	});
+		zyq::shared_ptr<FILE> spF3(fopen("Test.cpp", "r"), [](FILE* ptr) {
+			cout << "lambda fclose:" << ptr << endl;
+			fclose(ptr);
+			});
 	}
-}
+} 
