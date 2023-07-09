@@ -145,108 +145,108 @@ protected:
 	int _errid; // 错误码
 	string _errmsg; // 错误描述
 };
-
-class SqlException : public Exception
-{
-public:
-	SqlException(int errid, const string& msg, const string& sql)
-		:Exception(errid, msg)
-		,_sql(sql)
-	{}
-
-	virtual string what() const
-	{
-		string msg = "SqlException：";
-		msg += _errmsg;
-		msg += "->";
-		msg += _sql;
-
-		return msg;
-	}
-
-protected:
-	string _sql;
-};
-
-class CacheException : public Exception
-{
-public:
-	CacheException(const string& errmsg, int id)
-		:Exception(id, errmsg)
-	{}
-
-	virtual string what() const
-	{
-		string msg = "CacheException：";
-		msg += _errmsg;
-
-		return msg;
-	}
-};
-
-class HttpServerException : public Exception
-{
-public:
-	HttpServerException(const string& errmsg, int id, const string& type)
-		:Exception(id, errmsg)
-		, _type(type)
-	{}
-
-	virtual string what() const
-	{
-		string msg = "HttpServerException：";
-		msg += _errmsg;
-		msg += "->";
-		msg += _type;
-
-		return msg;
-	}
-
-private:
-	const string _type;
-};
-
-void SQLMgr()
-{
-	srand(time(0));
-	if (rand() % 7 == 0)
-	{
-		throw SqlException(100, "权限不足", "select * from name = '张三'");
-	}
-
-	cout << "调用成功" << endl;
-}
-
-void CacheMgr()
-{
-	srand(time(0));
-	if (rand() % 5 == 0)
-	{
-		throw CacheException("权限不足", 100);
-	}
-	else if (rand() % 6 == 0)
-	{
-		throw CacheException("数据不存在", 101);
-	}
-
-	SQLMgr();
-}
-
-void HttpServer()
-{
-	// 模拟服务出错
-	srand(time(0));
-	if (rand() % 3 == 0)
-	{
-		throw HttpServerException("请求资源不存在", 100, "get");
-	}
-	else if (rand() % 4 == 0)
-	{
-		throw HttpServerException("权限不足", 101, "post");
-	}
-
-	CacheMgr();
-}
+//
+//class SqlException : public Exception
+//{
+//public:
+//	SqlException(int errid, const string& msg, const string& sql)
+//		:Exception(errid, msg)
+//		,_sql(sql)
+//	{}
+//
+//	virtual string what() const
+//	{
+//		string msg = "SqlException：";
+//		msg += _errmsg;
+//		msg += "->";
+//		msg += _sql;
+//
+//		return msg;
+//	}
+//
+//protected:
+//	string _sql;
+//};
+//
+//class CacheException : public Exception
+//{
+//public:
+//	CacheException(const string& errmsg, int id)
+//		:Exception(id, errmsg)
+//	{}
+//
+//	virtual string what() const
+//	{
+//		string msg = "CacheException：";
+//		msg += _errmsg;
+//
+//		return msg;
+//	}
+//};
+//
+//class HttpServerException : public Exception
+//{
+//public:
+//	HttpServerException(const string& errmsg, int id, const string& type)
+//		:Exception(id, errmsg)
+//		, _type(type)
+//	{}
+//
+//	virtual string what() const
+//	{
+//		string msg = "HttpServerException：";
+//		msg += _errmsg;
+//		msg += "->";
+//		msg += _type;
+//
+//		return msg;
+//	}
+//
+//private:
+//	const string _type;
+//};
+//
+//void SQLMgr()
+//{
+//	srand(time(0));
+//	if (rand() % 7 == 0)
+//	{
+//		throw SqlException(100, "权限不足", "select * from name = '张三'");
+//	}
+//
+//	cout << "调用成功" << endl;
+//}
+//
+//void CacheMgr()
+//{
+//	srand(time(0));
+//	if (rand() % 5 == 0)
+//	{
+//		throw CacheException("权限不足", 100);
+//	}
+//	else if (rand() % 6 == 0)
+//	{
+//		throw CacheException("数据不存在", 101);
+//	}
+//
+//	SQLMgr();
+//}
+//
+//void HttpServer()
+//{
+//	// 模拟服务出错
+//	srand(time(0));
+//	if (rand() % 3 == 0)
+//	{
+//		throw HttpServerException("请求资源不存在", 100, "get");
+//	}
+//	else if (rand() % 4 == 0)
+//	{
+//		throw HttpServerException("权限不足", 101, "post");
+//	}
+//
+//	CacheMgr();
+//}
 
 //int main()
 //{
@@ -278,7 +278,7 @@ void HttpServer()
 //}
 
 ///////////////////////////////////////////////////////////////////////////////////////
-double Division(int a, int b) // throw()//声明这些函数不会抛出异常
+double Division(int a, int b) // noexcept 此时异常无法捕获// throw()//声明这些函数不会抛出异常
 {
 	// 当b == 0时抛出异常
 	if (b == 0)
@@ -289,7 +289,7 @@ double Division(int a, int b) // throw()//声明这些函数不会抛出异常
 	return (double)a / (double)b;
 }
 
-void Func()
+void Func() // noexcept // 这里如果是间接的抛异常是不会显示警告
 {
 	// 这里可以看到如果发生除0错误抛出异常，另外下面的array没有得到释放。
 	// 所以这里捕获异常后并不处理异常，异常还是交给外面处理，这里捕获了再
@@ -302,7 +302,7 @@ void Func()
 	try
 	{
 		cout << Division(len, time) << endl;
-		HttpServer();
+		//HttpServer();
 	}
 	catch (...)   // 异常的重新抛出，代码不支持解析对象
 	{
@@ -354,3 +354,8 @@ int main()
 // // C++11 中新增的noexcept，表示不会抛异常
 // thread() noexcept;
 // thread(thread&& x) noexcept;
+
+//new/malloc/fopen/lock
+//delete/free/fclose/unlock
+
+//异常的缺点，执行流乱跳：没有用异常之前，跳出循环或者函数；有异常之后，可以跳跃多个函数
