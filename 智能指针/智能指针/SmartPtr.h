@@ -178,7 +178,7 @@ namespace zyq
 
 				_ptr = sp._ptr;
 				_pcount = sp._pcount;
-				//_pmtx = sp._pmtx;
+				_pmtx = sp._pmtx;
 
 				AddCount();
 			}
@@ -327,11 +327,11 @@ namespace zyq
 		//ListNode* _next;
 		//ListNode* _prev;
 
-		//zyq::shared_ptr<ListNode> _next;
-		//zyq::shared_ptr<ListNode> _prev;
+		zyq::shared_ptr<ListNode> _next;
+		zyq::shared_ptr<ListNode> _prev;
 
-		zyq::weak_ptr<ListNode> _next;
-		zyq::weak_ptr<ListNode> _prev;
+		//zyq::weak_ptr<ListNode> _next;
+		//zyq::weak_ptr<ListNode> _prev;
 		int _val;
 
 		~ListNode()
@@ -361,7 +361,7 @@ namespace zyq
 		//cout << n2.use_count() << endl;
 
 		n1->_next = n2;
-		n2->_prev = n1;
+		//n2->_prev = n1;
 
 		//cout << n1.use_count() << endl;
 		//cout << n2.use_count() << endl;

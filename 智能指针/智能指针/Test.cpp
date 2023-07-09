@@ -138,7 +138,7 @@ int main()
 	//test_shared();
 	//zyq::test_shared();
 	//zyq::test_shared_safe();
-	//zyq::test_shared_cycle();
-	zyq::test_shared_deletor();
+	zyq::test_shared_cycle();
+	//zyq::test_shared_deletor();
 
 }
