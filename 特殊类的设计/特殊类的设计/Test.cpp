@@ -49,6 +49,10 @@ public:
 		HeapOnly* pho = new HeapOnly(1);
 		return pho;
 	}
+	~HeapOnly()
+	{
+		cout << "~HeapOnly()" << endl;
+	}
 private:
 	HeapOnly(int x = 0)
 		:_x(x)
@@ -60,14 +64,15 @@ private:
 	int _x;
 };
 
-//int main()
-//{
-//	// HeapOnly ho1; // err
-//	// static HeapOnly ho2; // err
-//	// HeapOnly* pho3 = new HeapOnly; // err
-//	HeapOnly* p1 = HeapOnly::CreateObj(1);
-//	// HeapOnly p2(*p1); // 还需要将拷贝构造封掉
-//}
+int main()
+{
+	// HeapOnly ho1; // err
+	// static HeapOnly ho2; // err
+	// HeapOnly* pho3 = new HeapOnly; // err
+	HeapOnly* p1 = HeapOnly::CreateObj(1);
+	// HeapOnly p2(*p1); // 还需要将拷贝构造封掉
+	delete p1;
+}
 
 // 请设计一个类，只能在栈上创建对象
 class StackOnly
@@ -270,32 +275,32 @@ private:
 //	return 0;
 //}
 
-int main()
-{
-	srand(time(0));
-
-	size_t n = 30;
-	thread t1([n]() {
-		for (size_t i = 0; i < n; ++i)
-		{
-			Singleton::GetInstance()->Add("t1线程:" + to_string(rand()));
-		}
-		});
-
-	thread t2([n]() {
-		for (size_t i = 0; i < n; ++i)
-		{
-			Singleton::GetInstance()->Add("t2线程:" + to_string(rand()));
-		}
-		});
-
-	t1.join();
-	t2.join();
-
-	Singleton::GetInstance()->Print();
-
-	return 0;
-}
+//int main()
+//{
+//	srand(time(0));
+//
+//	size_t n = 30;
+//	thread t1([n]() {
+//		for (size_t i = 0; i < n; ++i)
+//		{
+//			Singleton::GetInstance()->Add("t1线程:" + to_string(rand()));
+//		}
+//		});
+//
+//	thread t2([n]() {
+//		for (size_t i = 0; i < n; ++i)
+//		{
+//			Singleton::GetInstance()->Add("t2线程:" + to_string(rand()));
+//		}
+//		});
+//
+//	t1.join();
+//	t2.join();
+//
+//	Singleton::GetInstance()->Print();
+//
+//	return 0;
+//}
 
 // 保证一些数据(一个进程中)全局只有唯一一份， 并且方便访问
 // 1. 把这些数据放进一个类中，把这个类设计成单例类
