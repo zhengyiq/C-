@@ -32,20 +32,25 @@ private:
 
 //int main()
 //{
-//	string str;
-//	// ctrl + c 信号强杀进程
-//	// ctrl + z + 换行 流对象提取到结束标志
+//	//string str;
+//	//// ctrl + c 信号强杀进程
+//	//// ctrl + z + 换行 流对象提取到结束标志
 //
-//	while (cin >> str) // 返回值是cin对象，istream的cin对象可以转bool 因为istream的这个-> explicit operator bool() const;支持自定义类型转内置类型，explicit添加后就防止隐式类型转换的发生需要强制转换
-//	{
-//		cout << str << endl;
-//	}
-//
-//	//int i = 0;
-//	//while (A())
+//	//while (cin >> str) // 返回值是cin对象，istream的cin对象可以转bool 因为istream的这个-> explicit operator bool() const;支持自定义类型转内置类型，explicit添加后就防止隐式类型转换的发生需要强制转换
 //	//{
-//	//	cout << i++<< ' ';
+//	//	cout << str << endl;
 //	//}
+//
+//	A a(1);
+//	int i = 10;
+//	while (a)
+//	{
+//		if (i < 0)
+//		{
+//			break;
+//		}
+//		cout << i-- << ' ';
+//	}
 //	
 //	// 内置类型转换成自定义类型
 //	const A& aa = 1; // 隐式类型转换, 这里引用的不是1，是调用构造函数形成的临时对象
@@ -232,29 +237,36 @@ struct ChatInfo
 	string _msg;  // 聊天信息
 };
 
+//int main()
+//{
+//	ChatInfo winfo = { "张三", 135246, { 2022, 4, 10 }, "晚上一起看电影吧" };
+//	stringstream oss;
+//	oss << winfo._name << " ";
+//	oss << winfo._id << " ";
+//	oss << winfo._date << " ";
+//	oss << winfo._msg;
+//	string str = oss.str();
+//	cout << str << endl;
+//
+//	stringstream iss(str);
+//	ChatInfo rinfo;
+//	iss >> rinfo._name;
+//	iss >> rinfo._id;
+//	iss >> rinfo._date;
+//	iss >> rinfo._msg;
+//
+//	cout << "-------------------------------------------------------" << endl;
+//	cout << "姓名：" << rinfo._name << "(" << rinfo._id << ") ";
+//	cout << rinfo._date << endl;
+//	cout << rinfo._name << ":>" << rinfo._msg << endl;
+//	cout << "-------------------------------------------------------" << endl;
+//
+//	return 0;
+//}
+
 int main()
 {
-	ChatInfo winfo = { "张三", 135246, { 2022, 4, 10 }, "晚上一起看电影吧" };
 	stringstream oss;
-	oss << winfo._name << " ";
-	oss << winfo._id << " ";
-	oss << winfo._date << " ";
-	oss << winfo._msg;
-	string str = oss.str();
-	cout << str << endl;
-
-	stringstream iss(str);
-	ChatInfo rinfo;
-	iss >> rinfo._name;
-	iss >> rinfo._id;
-	iss >> rinfo._date;
-	iss >> rinfo._msg;
-
-	cout << "-------------------------------------------------------" << endl;
-	cout << "姓名：" << rinfo._name << "(" << rinfo._id << ") ";
-	cout << rinfo._date << endl;
-	cout << rinfo._name << ":>" << rinfo._msg << endl;
-	cout << "-------------------------------------------------------" << endl;
-
-	return 0;
+	oss << "first : " << " " << " second";
+	cout << oss.str();
 }
